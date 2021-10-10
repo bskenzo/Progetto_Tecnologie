@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <form class="form-signin" method="post">{% csrf_token %}
+
+        <div class="d-flex flex-column pb-3">
+            {#            <img class="img-fluid mx-auto d-block" src="{% static 'Logofinale.png' %}" alt="Logo finale" width="72" height="72">#}
+        </div>
+
+        {% if messages %}
+            <ul class="messages" style="color: red">
+                {% for message in messages %}
+                    <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+        {{ form | crispy }}
+        <input class="btn btn-lg btn-primary btn-block" type="submit" value="Login">
+    </form>
+
+    <div class="d-flex flex-column">
+        <a class="m-auto" href="{% url 'password_reset' %}">Forgot your password?</a>
+    </div>
+
+{% endblock content %}

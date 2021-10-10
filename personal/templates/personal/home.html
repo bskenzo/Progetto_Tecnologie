@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+
+        {% if messages %}
+            <ul class="messages" style="color: green">
+                {% for message in messages %}
+                    <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <h1 class="display-4">Coding with mitch blog</h1>
+        <p class="lead">lorem ipsum</p>
+    </div>
+
+    <div class="container">
+        <div class="d-flex flex-column">  <!-- Flex box -->
+            <h3>Registered Users:</h3>
+            {% for account in accounts %}
+                <p>{{ account }}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+
+
+{% endblock %}

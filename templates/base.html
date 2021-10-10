@@ -1,0 +1,27 @@
+{% load static %}
+
+<!doctype html>
+<html lang=en>
+
+<head>
+    <title>{% block title %} {% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">  {# Rende la pagina web responsive "si adatta al device" #}
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+    {% include 'snippets/header.html' %}
+
+</head>
+
+<body>
+    <!--Body-->
+    <div class="main">
+        {% block content %}
+
+        {% endblock %}
+    </div>
+    <!--End Body-->
+    {% include 'snippets/footer.html' %}
+
+</body>
+
+</html>
