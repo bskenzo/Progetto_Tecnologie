@@ -18,13 +18,14 @@ from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
-from personal.views import home_screen_view
+from personal.views import HomeView
 from account.views import RegisterUser, LoginUser, LogoutUser, PasswordChangeViewP, MustAuthenticate, \
-    UpdateUser
+    UpdateUser, PricingView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home_screen_view, name='home'),
+    path('', HomeView.as_view(), name='home'),
+    path('pricing/', PricingView.as_view(), name='pricing'),
     path('register/', RegisterUser.as_view(), name='register'),
     path('logout/', LogoutUser.as_view(), {'next_page': settings.LOGOUT_REDIRECT_URL}, name='logout'),
     path('login/', LoginUser.as_view(), name='login'),

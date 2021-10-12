@@ -1,13 +1,19 @@
-from django.shortcuts import render
+from django.views.generic import TemplateView
 
 from account.models import Account
 
 
-def home_screen_view(request):
+class HomeView(TemplateView):
 
-    context = {}
+    model = Account
+    template_name = 'personal/home.html'
 
-    accounts = Account.objects.all()
-    context['accounts'] = accounts
+    # Serve per passare i contenuti
+    def get_context_data(self, **kwargs):
 
-    return render(request, 'personal/home.html', context)
+        context = {}
+
+        accounts = Account.objects.all()
+        context['accounts'] = accounts
+
+        return context

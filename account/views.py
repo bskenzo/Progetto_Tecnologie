@@ -65,3 +65,9 @@ class PasswordChangeViewP(PasswordChangeView):
 class MustAuthenticate(TemplateView):
 
     template_name = 'account/must_authenticate.html'
+
+
+class PricingView(TemplateView):
+
+    template_name = 'account/subscribe.html'
+

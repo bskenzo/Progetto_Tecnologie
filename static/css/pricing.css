@@ -1,16 +1,6 @@
-.main{
-    min-height: 100vh;
-    height: 100%;
+html {
+    font-size: 14px;
 }
-
-body{
-    background-color: #f2f2f2;
-}
-
-.footer{
-    min-height: 100px;
-}
-
 @media (min-width: 768px) {
     html {
         font-size: 16px;
