@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     # my apps
     'personal',
     'account',
+    'movie.apps.MovieConfig',
 
 
     # django apps

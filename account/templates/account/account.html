@@ -4,7 +4,7 @@
 {% block content %}
 
     {% if messages %}
-        <ul class="messages" style="color: red">
+        <ul class="messages">
             {% for message in messages %}
                 <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
             {% endfor %}

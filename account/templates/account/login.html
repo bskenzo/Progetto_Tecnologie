@@ -5,12 +5,8 @@
 
     <form class="form-signin" method="post">{% csrf_token %}
 
-        <div class="d-flex flex-column pb-3">
-            {#            <img class="img-fluid mx-auto d-block" src="{% static 'Logofinale.png' %}" alt="Logo finale" width="72" height="72">#}
-        </div>
-
         {% if messages %}
-            <ul class="messages" style="color: red">
+            <ul class="messages">
                 {% for message in messages %}
                     <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
                 {% endfor %}

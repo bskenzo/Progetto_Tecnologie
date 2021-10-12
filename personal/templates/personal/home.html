@@ -5,7 +5,7 @@
     <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
 
         {% if messages %}
-            <ul class="messages" style="color: green">
+            <ul class="messages" >
                 {% for message in messages %}
                     <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
                 {% endfor %}
