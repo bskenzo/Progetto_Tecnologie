@@ -13,32 +13,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.conf import settings
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
 
 from personal.views import HomeView
-from account.views import RegisterUser, LoginUser, LogoutUser, PasswordChangeViewP, MustAuthenticate, \
-    UpdateUser, PricingView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomeView.as_view(), name='home'),
-    path('pricing/', PricingView.as_view(), name='pricing'),
-    path('register/', RegisterUser.as_view(), name='register'),
-    path('logout/', LogoutUser.as_view(), {'next_page': settings.LOGOUT_REDIRECT_URL}, name='logout'),
-    path('login/', LoginUser.as_view(), name='login'),
-    path('account/', UpdateUser.as_view(), name='account'),
-    path('must_authenticate/', MustAuthenticate.as_view(), name='must_authenticate'),
+    path('account/', include('account.urls')),
 
     # Password reset links (ref: https://github.com/django/django/blob/master/django/contrib/auth/views.py)
     path('password_change/done/',
          auth_views.PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html'),
          name='password_change_done'),
-
-    path('password_change/', PasswordChangeViewP.as_view(template_name='registration/password_change.html'),
-         name='password_change'),
 
     path('password_reset/done/',
          auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_done.html'),

@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, AbstractUser, User
 
 
 class MyAccountManager(BaseUserManager):
@@ -35,13 +35,16 @@ class MyAccountManager(BaseUserManager):
 class Account(AbstractBaseUser):
     email = models.EmailField(verbose_name='email', max_length=60, unique=True)
     username = models.CharField(max_length=30, unique=True)
-    date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True) # aggiunge automaticamente il campo ogni volta
+    date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)  # aggiunge automaticamente il campo ogni volta
     last_login = models.DateTimeField(verbose_name='last login', auto_now=True)
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    is_subscribe = models.BooleanField(default=False)
+    stripe_id = models.CharField(max_length=255, default="id_test")
+    stripe_subscription_id = models.CharField(max_length=255)
+    is_subscribe = models.CharField(max_length=255, default="not_active")
+    expire_date = models.DateField(verbose_name='expire date', default='1970-01-01')
     # possiamo aggiungere altri field come il nome o il compleanno
 
     USERNAME_FIELD = 'email'

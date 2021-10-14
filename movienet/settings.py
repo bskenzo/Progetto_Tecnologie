@@ -145,7 +145,7 @@ LOGIN_REDIRECT_URL = 'home'
 
 LOGOUT_REDIRECT_URL = 'home'
 
-LOGIN_URL = 'login'
+LOGIN_URL = 'must_authenticate'
 
 try:
     from django.contrib.messages import constants as messages
