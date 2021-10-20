@@ -17,7 +17,7 @@
         <form class="form-signin" method="POST">{% csrf_token %}
             {{ form.as_p }}
             <input type="submit" class="btn btn-outline-danger m-auto" name="delete" value="Submit">
-            <a href="{% url 'account' %}"><button type="button" class="btn btn-outline-primary m-auto"">Return to account</button></a>
+            <a href="{% url 'account:account' %}"><button type="button" class="btn btn-outline-primary m-auto">Return to account</button></a>
         </form>
     </div>
 

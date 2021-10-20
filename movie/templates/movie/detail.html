@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+
+        {% if messages %}
+            <ul class="messages text-center" >
+                {% for message in messages %}
+                    <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="row">
+            <!-- Blog post -->
+            <div class="card m-auto">
+                <img class="card-img-top" src="{{ object.poster.url }}" alt="">
+                <div class="card-body my-2">
+                    <h2 class="card-title">{{ object.title }}</h2>
+                    <p class="card-text">{{ object.price }} €</p>
+                    {% if user.is_staff %}
+                        <a href="{% url 'movie:update-film' object.pk %}" class="btn btn-outline-primary">Update</a>
+                        <a href="{% url 'movie:delete-film' object.pk %}" class="btn btn-outline-danger">Delete</a>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-muted">
+                    Director: {{ object.director }}
+                    <span class="right">{{ object.release_date }}</span>
+                </div>
+            </div>
+
+            <!-- end Blog post -->
+        </div>
+    </div>
+
+{% endblock content %}

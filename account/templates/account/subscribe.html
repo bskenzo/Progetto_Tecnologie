@@ -9,31 +9,39 @@
     <link rel="stylesheet" href="{% static 'css/pricing.css' %}">
 
     <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-        <h1 class="display-4">Pricing</h1>
-        <p class="lead">Quickly build an effective pricing table for your potential customers with this Bootstrap example.
-            It’s built with default Bootstrap components and utilities with little customization.</p>
+        <h1 class="display-4">Subscribe</h1>
+        {% if user.is_subscribe != "active" %}
+            <p class="lead">Choose here your subscription</p>
+        {% else %}
+            <p class="lead">You already have a subscription</p>
+        {% endif %}
+
     </div>
 
     <div class="container">
+        {% if user.is_subscribe == "active" %}
+            <h5 class="mb-3 text-center">Your subscription expire: {{ user.expire_date }}</h5>
+        {% endif %}
         <div class="card-deck mb-3 text-center">
-                {% if not user.is_authenticated %}
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header">
-                            <h4 class="my-0 font-weight-normal">Free</h4>
-                        </div>
-                        <div class="card-body">
-                            <h1 class="card-title pricing-card-title">$0 <small class="text-muted">/ mo</small></h1>
-                            <ul class="list-unstyled mt-3 mb-4">
-                                <li>10 users included</li>
-                                <li>2 GB of storage</li>
-                                <li>Email support</li>
-                                <li>Help center access</li>
-                            </ul>
-                            <a href="{% url 'register' %}" type="button"
-                               class="btn btn-lg btn-block btn-outline-primary" >Sign up for free</a>
-                        </div>
+            {% if not user.is_authenticated %}
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header">
+                        <h4 class="my-0 font-weight-normal">Free</h4>
                     </div>
-                {% endif %}
+                    <div class="card-body">
+                        <h1 class="card-title pricing-card-title">$0 <small class="text-muted">/ mo</small></h1>
+                        <ul class="list-unstyled mt-3 mb-4">
+                            <li>10 users included</li>
+                            <li>2 GB of storage</li>
+                            <li>Email support</li>
+                            <li>Help center access</li>
+                        </ul>
+                        <a href="{% url 'account:register' %}" type="button"
+                           class="btn btn-lg btn-block btn-outline-primary" >Sign up for free</a>
+                    </div>
+                </div>
+            {% endif %}
+            {% if user.is_subscribe != "active" %}
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header">
                         <h4 class="my-0 font-weight-normal">Pro</h4>
@@ -46,7 +54,7 @@
                             <li>Priority email support</li>
                             <li>Help center access</li>
                         </ul>
-                        <a href="{% url 'checkout' %}?price=Monthly"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        <a href="{% url 'account:checkout' %}?price=Monthly"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
                     </div>
                 </div>
                 <div class="card mb-4 shadow-sm">
@@ -61,9 +69,11 @@
                             <li>Phone and email support</li>
                             <li>Help center access</li>
                         </ul>
-                        <a href="{% url 'checkout' %}?price=Annual"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        <a href="{% url 'account:checkout' %}?price=Annual"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
                     </div>
                 </div>
+            {% endif %}
+
         </div>
     </div>
 

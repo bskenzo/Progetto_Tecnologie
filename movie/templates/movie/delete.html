@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/update.css' %}">
+    <link rel="stylesheet" href="{% static 'css/detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header" style="background-color: #F6F6F6">
+                        <h2 class="fw-bold">Delete Film - {{ object.title }}</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data">{% csrf_token %}
+
+                            <div class="form-group image-group" id="id_image">
+                                    <img class="img-fluid" src="{{object.poster.url}}" alt="">
+                                </div>
+
+                            <div class="mb-3">
+                                <p>{{ object.genre }} - {{ object.director }}</p>
+                                <p>{{ object.plot }}</p>
+                            </div>
+
+
+                            <div class="my-3">
+                                <button type="submit" class="btn btn-outline-danger m-auto">Delete</button>
+                                <a href="{% url 'movie:film-detail' object.pk %}" class="btn btn-outline-primary m-auto">Return to detail</a>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

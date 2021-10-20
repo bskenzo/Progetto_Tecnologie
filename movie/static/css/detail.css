@@ -1,0 +1,11 @@
+.card {
+    max-width: 700px;
+}
+
+.card#list {
+    width: 80%;
+}
+
+.container {
+    padding: 20px;
+}

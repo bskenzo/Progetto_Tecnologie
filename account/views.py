@@ -56,7 +56,7 @@ class UpdateUser(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Account
     form_class = AccountUpdateForm
     template_name = 'account/account.html'
-    success_url = reverse_lazy('account')
+    success_url = reverse_lazy('account:account')
     success_message = "Updated successfully"
     permission_denied_message = "You must authenticate first!"
 
@@ -65,12 +65,15 @@ class UpdateUser(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         session = None
 
         if not request.user.is_authenticated:
-            return redirect('must_authenticate')
+            return redirect('account:must_authenticate')
 
         if request.user.stripe_id != "id_test":
             session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions'])
             if not session.subscriptions.data:
                 request.user.is_subscribe = "not_active"
+                request.user.expire_date = "1970-01-01"
+                request.user.stripe_subscription_id = ""
+                request.user.save()
             else:
                 request.user.is_subscribe = session.subscriptions.data[0].status
                 request.user.expire_date = datetime.fromtimestamp(session.subscriptions.data[0].cancel_at).strftime('%Y-%m-%d')
@@ -117,26 +120,6 @@ class DeleteAccountView(LoginRequiredMixin, DeleteView):
         messages.success(request, "The user is deleted")
         return super().delete(request)
 
-    # def dispatch(self, request, *args, **kwargs):
-    #     if request.method == 'GET':
-    #         return render(request, 'account/delete_account.html')
-    #
-    #     if request.method == 'POST':
-    #         if request.POST['delete'] == 'Yes':
-    #             u = request.user
-    #
-    #             if request.user.stripe_id != "id_test":
-    #                 stripe.Customer.delete(request.user.stripe_id)
-    #
-    #             logout(request)
-    #             u.delete()
-    #             messages.success(request, "The user is deleted")
-    #             return redirect('home')
-    #         else:
-    #             return redirect('account')
-    #
-    #     return render(request, 'account/account.html')
-
 
 class PricingView(TemplateView):
 
@@ -150,7 +133,7 @@ class CheckoutView(TemplateView):
     def dispatch(self, request, *args, **kwargs):
 
         if not request.user.is_authenticated:
-            return redirect('must_authenticate')
+            return redirect('account:must_authenticate')
 
         coupons = {'christmas': 20, 'easter': 10, 'epiphany': 5}
 
@@ -188,6 +171,7 @@ class CheckoutView(TemplateView):
                                                                   items=[{'price': price}],
                                                                   cancel_at_period_end=True)
 
+                    session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions']) # recuperiamo la sessione aggiornata
                     customer = request.user
                     customer.is_subscribe = True
                     customer.stripe_subscription_id = subscription.id

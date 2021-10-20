@@ -18,8 +18,8 @@
     </form>
 
     <div class="d-flex flex-column">
-        <a class="m-auto pb-2" href="{% url 'password_change' %}">Change password</a>
-        <a class="m-auto pb-4" href="{%  url 'delete' user.pk %}">Delete Account</a>
+        <a class="m-auto pb-2" href="{% url 'account:password_change' %}">Change password</a>
+        <a class="m-auto pb-4" href="{%  url 'account:delete' user.pk %}">Delete Account</a>
     </div>
 
     <div class="d-flex flex-column">
@@ -27,7 +27,7 @@
             <h4 class="m-auto ">Il tuo abbonamento scade il: {{ user.expire_date }}</h4>
         {% else %}
             <h4 class="m-auto">Non hai nessun abbonamento attivo</h4>
-            <p class="m-auto">Se vuoi sottoscrivere un abbonamento <a href="{% url 'pricing' %}">clicca qui</a> </p>
+            <p class="m-auto">Se vuoi sottoscrivere un abbonamento <a href="{% url 'account:pricing' %}">clicca qui</a> </p>
         {% endif %}
     </div>
 

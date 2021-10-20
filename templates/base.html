@@ -7,9 +7,12 @@
     <title>{% block title %} {% endblock %}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">  {# Rende la pagina web responsive "si adatta al device" #}
+
+    {% include 'snippets/header.html' %}
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/register.css' %}">
-    {% include 'snippets/header.html' %}
+
+    {% block style %}{% endblock %}
 
 </head>
 

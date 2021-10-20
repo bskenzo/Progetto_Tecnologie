@@ -1,0 +1,43 @@
+.image {
+    opacity: 1;
+    transition: .5s ease;
+    backface-visibility: hidden;
+}
+
+.middle {
+    transition: .5s ease;
+    opacity: 0;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+}
+.image-group{
+    position: relative;
+    text-align: center;
+    cursor:pointer;
+}
+
+.image-group#id_image{
+    position: relative;
+    text-align: center;
+    cursor: default;
+}
+
+.image-group:hover .image {
+    opacity: 0.3;
+}
+
+.image-group:hover .middle {
+    opacity: 1;
+}
+
+.text {
+    margin: auto;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 15px;
+    padding: 15px;
+}

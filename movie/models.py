@@ -1,27 +1,16 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.utils.timezone import now
 from account.models import Account
-
-# Create your models here.
 
 
 class Film(models.Model):
     title = models.CharField(max_length=100)
-    genre = models.CharField(max_length=250, default='N/a')
-    director = models.CharField(max_length=250, default='N/a', null=True, blank=True)
-    plot = models.TextField()
-    poster = models.ImageField(default="default.png", upload_to="posters")
-    release_date = models.DateField(blank=True, null=True)
-    date_posted = models.DateTimeField(default=now)
+    genre = models.CharField(max_length=250)
+    director = models.CharField(max_length=250)
+    plot = models.TextField(max_length=250)
+    poster = models.ImageField(upload_to='images/')
+    release_date = models.DateField()
+    date_posted = models.DateTimeField(auto_now_add=True, verbose_name="date published")
+    price = models.CharField(max_length=250, default='7.99')
 
-
-class Review(models.Model):
-    writer = models.ForeignKey(Account, on_delete=models.CASCADE)
-    reviewed_film = models.ForeignKey(Film, related_name='reviews', on_delete=models.CASCADE)
-
-    title = models.CharField(max_length=100)
-    content = models.TextField()
-    rating = models.IntegerField(
-        default=1, validators=[MinValueValidator(1), MaxValueValidator(5)]
-    )
+    def __str__(self):
+        return self.title

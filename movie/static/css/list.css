@@ -1,0 +1,32 @@
+/*.parent {*/
+/*  display: flex;*/
+/*  flex-wrap: wrap;*/
+/*}*/
+
+.parent {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 100%;
+  /*grid-column-gap: 1px;*/
+  /*grid-row-gap: 1ch;*/
+  /*column-gap: 3px;*/
+}
+
+.child {
+  flex: 1 0 21%; /* explanation below */
+  /*margin-bottom: 5px;*/
+  /*margin-top: 5px;*/
+}
+
+.parent .child:first-child {
+  padding-left: 0;
+}
+
+.parent .child:last-child {
+  padding-right: 0;
+}
+
+.parent .child:nth-child(4n) {
+  padding-left: 0;
+  padding-right: 0;
+}

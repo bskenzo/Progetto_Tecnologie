@@ -4,6 +4,8 @@ from django.urls import path
 from account.views import PricingView, RegisterUser, LogoutUser, LoginUser, UpdateUser, MustAuthenticate, CheckoutView, \
     PasswordChangeViewP, DeleteAccountView
 
+app_name = 'account'
+
 urlpatterns = [
 
     path('pricing/', PricingView.as_view(), name='pricing'),
