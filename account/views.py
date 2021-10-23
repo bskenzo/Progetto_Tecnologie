@@ -13,8 +13,6 @@ from django.urls import reverse_lazy
 from account.models import Account
 import stripe
 
-stripe.api_key = "sk_test_51JjpSBH1UjLFf6ccnvnflqfD1NkLyfRXOC0OxKjvwi4sYv2I3bpSz5Deiu7dgP0296tb8dy5OuwT7sXjJjZBBjWx00c3Hiu3VB"
-
 
 class RegisterUser(CreateView):
 
@@ -69,7 +67,14 @@ class UpdateUser(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
 
         if request.user.stripe_id != "id_test":
             session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions'])
-            if not session.subscriptions.data:
+            if hasattr(session, 'deleted'):
+                if session.deleted:
+                    request.user.stripe_id = "id_test"
+                    request.user.is_subscribe = "not_active"
+                    request.user.expire_date = "1970-01-01"
+                    request.user.stripe_subscription_id = ""
+                    request.user.save()
+            elif not session.subscriptions.data:
                 request.user.is_subscribe = "not_active"
                 request.user.expire_date = "1970-01-01"
                 request.user.stripe_subscription_id = ""
@@ -126,73 +131,26 @@ class PricingView(TemplateView):
     template_name = 'account/subscribe.html'
 
 
-class CheckoutView(TemplateView):
+class CheckoutView(UpdateView):
 
     template_name = 'account/payments/checkout.html'
 
-    def dispatch(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
         if not request.user.is_authenticated:
             return redirect('account:must_authenticate')
 
         coupons = {'christmas': 20, 'easter': 10, 'epiphany': 5}
 
-        if request.method == 'POST':
-
-            # se l'utente esiste su stripe
-            if request.user.stripe_id != "id_test":
-                session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions']) # recupero l'abbonamento
-                # se esiste e non ha un abbonamento attivo, gli creiamo un abbonamento
-                if not session.subscriptions.data:
-                    messages.add_message(
-                        self.request, messages.SUCCESS,
-                        'Payment successfully!'
-                    )
-                    if request.POST['price'] == 'Monthly':
-                        price = 'price_1JjpqoH1UjLFf6ccEDLeXR4F'
-
-                    else:
-                        price = 'price_1Jjps4H1UjLFf6ccT1s7xqtU'
-
-                    if request.POST['coupon'] in coupons:
-                        percentage = coupons[request.POST['coupon'].lower()]
-                        try:
-                            coupon = stripe.Coupon.create(duration='once',
-                                                          id=request.POST['coupon'].lower(),
-                                                          percent_off=percentage)
-                        except:
-                            pass
-                        subscription = stripe.Subscription.create(customer=request.user.stripe_id,
-                                                                  items=[{'price': price}],
-                                                                  coupon=request.POST['coupon'].lower(),
-                                                                  cancel_at_period_end=True)
-                    else:
-                        subscription = stripe.Subscription.create(customer=request.user.stripe_id,
-                                                                  items=[{'price': price}],
-                                                                  cancel_at_period_end=True)
-
-                    session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions']) # recuperiamo la sessione aggiornata
-                    customer = request.user
-                    customer.is_subscribe = True
-                    customer.stripe_subscription_id = subscription.id
-                    customer.expire_date = datetime.fromtimestamp(session.subscriptions.data[0].cancel_at).strftime('%Y-%m-%d')
-                    customer.save()
-                # altrimenti se esiste e ha gia un abbonamento
-                else:
-                    messages.add_message(
-                        self.request, messages.SUCCESS,
-                        'User just have a subscribe!'
-                    )
-            # se non esiste su stripe
-            else:
+        # se l'utente esiste su stripe
+        if request.user.stripe_id != "id_test":
+            session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions']) # recupero l'abbonamento
+            # se esiste e non ha un abbonamento attivo, gli creiamo un abbonamento
+            if not session.subscriptions.data:
                 messages.add_message(
                     self.request, messages.SUCCESS,
                     'Payment successfully!'
                 )
-
-                stripe_customer = stripe.Customer.create(email=request.user.email,
-                                                         source=request.POST['stripeToken'])
-
                 if request.POST['price'] == 'Monthly':
                     price = 'price_1JjpqoH1UjLFf6ccEDLeXR4F'
 
@@ -202,54 +160,101 @@ class CheckoutView(TemplateView):
                 if request.POST['coupon'] in coupons:
                     percentage = coupons[request.POST['coupon'].lower()]
                     try:
-                        coupon = stripe.Coupon.create(duration='once',
-                                                      id=request.POST['coupon'].lower(),
-                                                      percent_off=percentage)
+                        stripe.Coupon.create(duration='once',
+                                             id=request.POST['coupon'].lower(),
+                                             percent_off=percentage)
                     except:
                         pass
-                    subscription = stripe.Subscription.create(customer=stripe_customer.id,
+                    subscription = stripe.Subscription.create(customer=request.user.stripe_id,
                                                               items=[{'price': price}],
                                                               coupon=request.POST['coupon'].lower(),
                                                               cancel_at_period_end=True)
                 else:
-                    subscription = stripe.Subscription.create(customer=stripe_customer.id,
+                    subscription = stripe.Subscription.create(customer=request.user.stripe_id,
                                                               items=[{'price': price}],
                                                               cancel_at_period_end=True)
 
+                session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions']) # recuperiamo la sessione aggiornata
                 customer = request.user
-                customer.stripe_id = stripe_customer.id
                 customer.is_subscribe = True
                 customer.stripe_subscription_id = subscription.id
-                session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions'])
                 customer.expire_date = datetime.fromtimestamp(session.subscriptions.data[0].cancel_at).strftime('%Y-%m-%d')
                 customer.save()
-
-            return redirect('home')
-
+            # altrimenti se esiste e ha gia un abbonamento
+            else:
+                messages.add_message(
+                    self.request, messages.SUCCESS,
+                    'User just have a subscribe!'
+                )
+        # se non esiste su stripe
         else:
-            coupon_amount = 0
-            coupon = 'none'
-            price = 'Monthly'
-            amount = 8.99
-            original_amount = 8.99
-            final_amount = 8.99
-            if request.method == 'GET' and 'price' in request.GET:
-                if request.GET['price'] == 'Annual':
-                    price = 'Annual'
-                    amount = 89.99
-                    original_amount = 89.99
-                    final_amount = 89.99
+            messages.add_message(
+                self.request, messages.SUCCESS,
+                'Payment successfully!'
+            )
 
-            if request.method == 'GET' and 'coupon' in request.GET:
-                if request.GET['coupon'].lower() in coupons:
-                    coupon = request.GET['coupon'].lower()
-                    percentage = coupons[request.GET['coupon'].lower()]
-                    coupon_price = float((percentage/100)*amount)
-                    amount = amount - coupon_price
-                    coupon_amount = str(coupon_price)
-                    final_amount = str(round(amount, 2))
+            stripe_customer = stripe.Customer.create(email=request.user.email,
+                                                     source=request.POST['stripeToken'])
 
-            return render(request, 'account/payments/checkout.html', {'price': price, 'amount': amount*100,
-                                                                      'coupon': coupon, 'coupon_amount': coupon_amount,
-                                                                      'final_amount': final_amount,
-                                                                      'original_amount': original_amount})
+            if request.POST['price'] == 'Monthly':
+                price = 'price_1JjpqoH1UjLFf6ccEDLeXR4F'
+
+            else:
+                price = 'price_1Jjps4H1UjLFf6ccT1s7xqtU'
+
+            if request.POST['coupon'] in coupons:
+                percentage = coupons[request.POST['coupon'].lower()]
+                try:
+                    stripe.Coupon.create(duration='once',
+                                         id=request.POST['coupon'].lower(),
+                                         percent_off=percentage)
+                except:
+                    pass
+                subscription = stripe.Subscription.create(customer=stripe_customer.id,
+                                                          items=[{'price': price}],
+                                                          coupon=request.POST['coupon'].lower(),
+                                                          cancel_at_period_end=True)
+            else:
+                subscription = stripe.Subscription.create(customer=stripe_customer.id,
+                                                          items=[{'price': price}],
+                                                          cancel_at_period_end=True)
+
+            customer = request.user
+            customer.stripe_id = stripe_customer.id
+            customer.is_subscribe = True
+            customer.stripe_subscription_id = subscription.id
+            session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions'])
+            customer.expire_date = datetime.fromtimestamp(session.subscriptions.data[0].cancel_at).strftime('%Y-%m-%d')
+            customer.save()
+
+        return redirect('home')
+
+    def get(self, request, *args, **kwargs):
+        coupons = {'christmas': 20, 'easter': 10, 'epiphany': 5}
+
+        coupon_amount = 0
+        coupon = 'none'
+        price = 'Monthly'
+        amount = 8.99
+        original_amount = 8.99
+        final_amount = 8.99
+        if request.method == 'GET' and 'price' in request.GET:
+            if request.GET['price'] == 'Annual':
+                price = 'Annual'
+                amount = 89.99
+                original_amount = 89.99
+                final_amount = 89.99
+
+        if request.method == 'GET' and 'coupon' in request.GET:
+            if request.GET['coupon'].lower() in coupons:
+                coupon = request.GET['coupon'].lower()
+                percentage = coupons[request.GET['coupon'].lower()]
+                coupon_price = float((percentage/100)*amount)
+                amount = amount - coupon_price
+                coupon_amount = str(coupon_price)
+                final_amount = str(round(amount, 2))
+
+        return render(request, 'account/payments/checkout.html', {'price': price, 'amount': amount*100,
+                                                                  'coupon': coupon, 'coupon_amount': coupon_amount,
+                                                                  'final_amount': final_amount,
+                                                                  'original_amount': original_amount})
