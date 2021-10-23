@@ -22,15 +22,19 @@
             <div class="card m-auto">
                 <img class="card-img-top" src="{{ object.poster.url }}" alt="">
                 <div class="card-body my-2">
-                    <h2 class="card-title">{{ object.title }}</h2>
+                    <h2 class="card-title">{{ object.title }} - {{ object.director }}</h2>
                     <p class="card-text">{{ object.genre }}</p>
-                    <p class="card-text">{{ object.price }} €</p>
+                    <p class="card-text">{{ object.plot }}</p>
+
                     {% if user.is_staff %}
                         <a href="{% url 'movie:update-film' object.pk %}" class="btn btn-outline-primary">Update</a>
                         <a href="{% url 'movie:delete-film' object.pk %}" class="btn btn-outline-danger">Delete</a>
+                        <a href="{% url 'movie:checkout' %}?price={{ object.pk }}" class="btn btn-outline-success my-2">Test buy</a>
                     {% endif %}
-                    {% if user.is_subscribe == 'True' %}
+                    {% if user.is_subscribe == 'active'%}
                         <a href="{% url 'movie:create-review' object.pk %}" class="btn btn-outline-primary">Review</a>
+                    {% else %}
+                        <a href="{% url 'movie:checkout' %}?price={{ object.pk }}" class="btn btn-outline-success">Buy for {{ object.price }} €</a>
                     {% endif %}
                 </div>
                 <div class="card-footer text-muted">
@@ -42,47 +46,49 @@
             <!-- end Film post -->
             {% for r in review %}
                 {% if r.reviewed_film_id == object.pk %}
-                    <div class="px-0 py-5 mx-auto">
-                        <div class="row justify-content-center mx-0 mx-md-auto">
-                            <div class="col-lg-10 col-md-11 px-1 px-sm-2">
-                                <div class="card border-0 px-3">
-                                    <!-- top row -->
-                                    <div class="row bg-light">
-                                    </div> <!-- Review by user -->
-                                    <div class="review p-5">
-                                        <div class="row d-flex">
-                                            <div class="d-flex flex-column">
-                                                <h4>{{ r.writer.username | capfirst }}</h4>
-                                                <p class="grey-text">{{ r.date_posted }}</p>
+                    <div class="container my-3 mx-auto">
+                        <div class="m-auto">
+                            <div class="row justify-content-center mx-md-auto">
+                                <div class="col-md-9 m-auto lead">
+                                    <div class="card border-4 px-4">
+
+                                        <!-- Review by user -->
+                                        <div class="review p-5">
+                                            <div class="d-flex">
+                                                <div class="d-flex flex-column">
+                                                    <h4>{{ r.writer.username | capfirst }}</h4>
+                                                    <p class="grey-text">{{ r.date_posted }}</p>
+                                                </div>
+                                            </div>
+                                            <div class=" pb-3">
+                                                <div class="d-flex flex-column green-text">
+                                                    <h5 class="mb-0 te">{{ r.title }}</h5>
+                                                </div>
+                                            </div>
+                                            <div class=" pb-1">
+                                                <p>{{ r.content }}</p>
+                                            </div>
+                                            <div class="d-flex">
+                                                <div class="green-tab p-2 px-3 mx-2">
+                                                    <p class="sm-text mb-0">OVERALL RATING</p>
+                                                    <h4>{{ r.rating }}</h4>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="row pb-3">
-                                            <div class="green-text">
-                                                <h5 class="mb-0">{{ r.title }}</h5>
+                                        {% if r.writer == user %}
+                                            <div class="my-2 mx-auto">
+                                                <a href="{% url 'movie:update-review' r.pk %}" class="btn btn-outline-warning">Update-Review</a>
+                                                <a href="{% url 'movie:delete-review' r.pk %}" class="btn btn-outline-danger">Delete-Review</a>
                                             </div>
-                                        </div>
-                                        <div class="row pb-1">
-                                            <p>{{ r.content }}</p>
-                                        </div>
-                                        <div class="d-flex row">
-                                            <div class="green-tab p-2 px-3 mx-2">
-                                                <p class="sm-text mb-0">OVERALL RATING</p>
-                                                <h4>{{ r.rating }}</h4>
-                                            </div>
-                                        </div>
+                                        {% endif %}
                                     </div>
-                                    {% if r.writer == user %}
-                                        <div class="my-2 mx-auto">
-                                            <a href="{% url 'movie:update-review' r.pk %}" class="btn btn-outline-warning">Update-Review</a>
-                                            <a href="{% url 'movie:delete-review' r.pk %}" class="btn btn-outline-danger">Delete-Review</a>
-                                        </div>
-                                    {% endif %}
                                 </div>
                             </div>
                         </div>
                     </div>
                 {% endif %}
             {% endfor %}
+
         </div>
     </div>
 

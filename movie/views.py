@@ -1,9 +1,10 @@
 import os
 
+import stripe
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
+from django.urls import reverse_lazy, reverse
+from django.views.generic import CreateView, DetailView, UpdateView, DeleteView, TemplateView
 from django.views.generic.list import ListView
 from django.shortcuts import render, redirect
 
@@ -12,6 +13,8 @@ from account.models import Account
 from movie.forms import FilmForm, ReviewForm
 from movie.mixins import AuthorRequiredMixin
 from movie.models import Film, CATEGORY_CHOICES, Review
+
+stripe.api_key = "sk_test_51JjpSBH1UjLFf6ccnvnflqfD1NkLyfRXOC0OxKjvwi4sYv2I3bpSz5Deiu7dgP0296tb8dy5OuwT7sXjJjZBBjWx00c3Hiu3VB"
 
 
 class FilmCreateView(LoginRequiredMixin, CreateView):
@@ -77,7 +80,12 @@ class FilmUpdateView(LoginRequiredMixin, UpdateView):
 class FilmDeleteView(LoginRequiredMixin, DeleteView):
     model = Film
     template_name = 'movie/delete.html'
-    success_url = reverse_lazy('movie:list')
+
+    def delete(self, request, *args, **kwargs):
+        film = Film.objects.get(id=self.get_object().pk)
+        film.poster.delete()
+        film.delete()
+        return redirect('home')
 
 
 class MovieListView(ListView):
@@ -85,6 +93,87 @@ class MovieListView(ListView):
     template_name = 'movie/movielist.html'
     context_object_name = 'films'
 
+
+class MyListView(TemplateView):
+    # model = Mylist
+    template_name = 'movie/mylist.html'
+    context_object_name = 'films'
+
+    # # def get_context_data(self, **kwargs):
+    # #     context = super().get_context_data(**kwargs)
+    # #     a = Film.objects.filter(email=user.email).first()
+    # #     context['review'] = Film.objects.all()
+    # #     return context
+    # def dispatch(self, request, *args, **kwargs):
+    #     a = Mylist.objects.filter(id=).first()
+
+
+class CheckoutView(UpdateView):
+
+    def post(self, request, *args, **kwargs):
+
+        if not request.user.is_authenticated:
+            return redirect('account:must_authenticate')
+
+        if request.user.is_subscribe == 'active':
+            return redirect('account:pricing')
+
+        product_id = request.GET['price']
+        product = Film.objects.get(id=product_id)
+        account = Account.objects.get(email=request.user.email)
+
+        if account.stripe_id != "id_test":
+
+            stripe.PaymentIntent.create(
+                amount=int(float(product.price)*100),
+                currency="eur",
+                payment_method_types=["card"],
+                customer=account.stripe_id,
+                description=f'Acquisto del film {product.title}',
+                confirm=True,
+                metadata={
+                    'product_id': product.id
+                }
+            )
+        else:
+            stripe_customer = stripe.Customer.create(email=request.user.email,
+                                                     source=request.POST['stripeToken'])
+
+            stripe.PaymentIntent.create(
+                amount=int(float(product.price)*100),
+                currency="eur",
+                payment_method_types=["card"],
+                customer=stripe_customer.stripe_id,
+                description=f'Acquisto del film {product.title}',
+                confirm=True,
+                metadata={
+                    'product_id': product.id
+                }
+            )
+
+            account.stripe_id = stripe_customer.id
+            account.save()
+
+        messages.add_message(
+            self.request, messages.SUCCESS,
+            'Payment successfully!'
+        )
+
+        return redirect('home')
+
+    def get(self, request, *args, **kwargs):
+
+        film = 'No_Choice'
+        amount = 0.00
+        amount_html = 0.00
+        if request.method == 'GET' and 'price' in request.GET:
+            prod = Film.objects.get(id=request.GET['price'])
+            film = prod.title
+            amount = float(prod.price)
+            amount_html = prod.price
+
+        return render(request, 'movie/payments/checkout.html', {'film': film, 'amount': amount*100,
+                                                                'amount_html': amount_html, 'prod': prod})
 
 # class TopListView(LoginRequiredMixin, ListView):
 #     model = Review
@@ -122,6 +211,7 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
             obj.save()
             return redirect('movie:film-detail', kwargs['pk'])
 
+        context['film_pk'] = kwargs['pk']
         context['form'] = form
 
         return render(request, 'movie/createreview.html', context)
@@ -132,7 +222,10 @@ class ReviewUpdateView(LoginRequiredMixin, AuthorRequiredMixin, UpdateView):
     model = Review
     form_class = ReviewForm
     template_name = 'movie/updatereview.html'
-    success_url = reverse_lazy('movie:list')
+    success_url = reverse_lazy('movie:film-detail')
+
+    def get_success_url(self):
+        return reverse('movie:film-detail', kwargs={'pk': self.object.reviewed_film_id})
 
 
 class ReviewDeleteView(LoginRequiredMixin, AuthorRequiredMixin, DeleteView):

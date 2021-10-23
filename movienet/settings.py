@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
+    'stripe',
 ]
 
 MIDDLEWARE = [
@@ -81,6 +82,8 @@ TEMPLATES = [
 
 AUTH_USER_MODEL = 'account.Account'
 AUTH_MOVIE_MODEL = 'movie.Film'
+
+AUTH_FILM_MODEL = 'movie.Film'
 
 WSGI_APPLICATION = 'movienet.wsgi.application'
 

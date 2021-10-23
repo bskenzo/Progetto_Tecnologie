@@ -17,8 +17,14 @@ class HomeView(TemplateView):
         if request.user.is_authenticated:
             if request.user.stripe_id != "id_test":
                 session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions'])
-                print(session)
-                if not session.subscriptions.data:
+                if hasattr(session, 'deleted'):
+                    if session.deleted:
+                        request.user.stripe_id = "id_test"
+                        request.user.is_subscribe = "not_active"
+                        request.user.expire_date = "1970-01-01"
+                        request.user.stripe_subscription_id = ""
+                        request.user.save()
+                elif not session.subscriptions.data:
                     request.user.is_subscribe = "not_active"
                     request.user.expire_date = "1970-01-01"
                     request.user.stripe_subscription_id = ""
