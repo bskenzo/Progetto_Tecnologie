@@ -8,8 +8,10 @@ from django.views.generic.list import ListView
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from movie.forms import FilmForm
-from movie.models import Film
+from account.models import Account
+from movie.forms import FilmForm, ReviewForm
+from movie.mixins import AuthorRequiredMixin
+from movie.models import Film, CATEGORY_CHOICES, Review
 
 
 class FilmCreateView(LoginRequiredMixin, CreateView):
@@ -37,6 +39,11 @@ class FilmDetailView(DetailView):
     model = Film
     template_name = 'movie/detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['review'] = Review.objects.all()
+        return context
+
 
 class FilmUpdateView(LoginRequiredMixin, UpdateView):
     model = Film
@@ -46,7 +53,7 @@ class FilmUpdateView(LoginRequiredMixin, UpdateView):
     def dispatch(self, request, *args, **kwargs):
 
         prod = Film.objects.get(id=self.get_object().pk)
-        context = {'prod': prod}
+        context = {'prod': prod, 'choices': CATEGORY_CHOICES}
 
         if request.method == "POST":
             if len(request.FILES) != 0:
@@ -70,7 +77,7 @@ class FilmUpdateView(LoginRequiredMixin, UpdateView):
 class FilmDeleteView(LoginRequiredMixin, DeleteView):
     model = Film
     template_name = 'movie/delete.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('movie:list')
 
 
 class MovieListView(ListView):
@@ -78,6 +85,57 @@ class MovieListView(ListView):
     template_name = 'movie/movielist.html'
     context_object_name = 'films'
 
-    # def dispatch(self, request, *args, **kwargs):
-    #
-    #     context['']
+
+# class TopListView(LoginRequiredMixin, ListView):
+#     model = Review
+#     template_name = 'movie/toplist.html'
+#     context_object_name = 'films'
+#
+#     def get_queryset(self):
+#         return Film.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
+
+
+class ReviewCreateView(LoginRequiredMixin, CreateView):
+
+    model = Review
+    form_class = ReviewForm
+    template_name = 'movie/createreview.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        context = {}
+
+        user = request.user
+        if not user.is_authenticated:
+            return redirect('must_authenticate')
+
+        if user.is_subscribe == 'not_active':
+            return redirect('account:pricing')
+
+        form = ReviewForm(request.POST or None, request.FILES or None)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            writer = Account.objects.filter(email=user.email).first()
+            reviewed_film = kwargs['pk']
+            obj.writer = writer
+            print(obj)
+            obj.reviewed_film_id = reviewed_film
+            obj.save()
+            return redirect('movie:film-detail', kwargs['pk'])
+
+        context['form'] = form
+
+        return render(request, 'movie/createreview.html', context)
+
+
+class ReviewUpdateView(LoginRequiredMixin, AuthorRequiredMixin, UpdateView):
+
+    model = Review
+    form_class = ReviewForm
+    template_name = 'movie/updatereview.html'
+    success_url = reverse_lazy('movie:list')
+
+
+class ReviewDeleteView(LoginRequiredMixin, AuthorRequiredMixin, DeleteView):
+    model = Review
+    template_name = 'movie/deletereview.html'
+    success_url = reverse_lazy('movie:list')

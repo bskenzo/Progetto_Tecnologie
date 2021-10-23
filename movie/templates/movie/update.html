@@ -27,7 +27,11 @@
 
                                 <div class="mb-3">
                                     <label for="genre" class="form-label">Genre</label>
-                                    <input type="text" name="genre" required value="{{ prod.genre }}" class="form-control" id="genre" />
+                                    <select name="genre" required value="{{ prod.genre }}" class="form-control" id="genre">
+                                        {% for x, genre in choices %}
+                                            <option>{{ genre }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
 
                                 <div class="mb-3">
@@ -54,7 +58,7 @@
 
                                 <div class="form-group image-group" id="id_image_group">
                                     {% if prod.poster %}
-                                        <img class="img-fluid image" src="{{prod.poster.url}}" id="id_image_display">
+                                        <img class="img-fluid image" src="{{prod.poster.url}}" id="id_image_display" alt="">
                                     {% endif %}
                                     <div class="middle">
                                         <div class="text">Change image</div>

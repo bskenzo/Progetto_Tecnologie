@@ -80,6 +80,7 @@ TEMPLATES = [
 ]
 
 AUTH_USER_MODEL = 'account.Account'
+AUTH_MOVIE_MODEL = 'movie.Film'
 
 WSGI_APPLICATION = 'movienet.wsgi.application'
 
