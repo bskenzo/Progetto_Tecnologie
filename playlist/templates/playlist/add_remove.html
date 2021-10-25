@@ -1,0 +1,9 @@
+{% extends base.html %}
+
+{% block content %}
+    {% for i in film %}
+        {% for v in playlist %}
+            <a class="dropdown-item" href="{% url 'playlist:add-remove' operation='add' pk=i.pk playlist_id=v.id%}">Add to{{v.name}}</a>
+        {% endfor %}
+    {% endfor %}
+{% endblock %}

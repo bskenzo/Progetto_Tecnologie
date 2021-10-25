@@ -1,6 +1,5 @@
 from django import forms
 
-from account.models import Account
 from movie.models import Film, Review
 
 

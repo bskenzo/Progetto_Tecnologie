@@ -195,7 +195,7 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
 
         user = request.user
         if not user.is_authenticated:
-            return redirect('must_authenticate')
+            return redirect('account:must_authenticate')
 
         if user.is_subscribe == 'not_active':
             return redirect('account:pricing')

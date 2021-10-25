@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'personal',
     'account',
     'movie',
+    'playlist',
 
 
     # django apps
@@ -153,7 +154,7 @@ LOGIN_REDIRECT_URL = 'home'
 
 LOGOUT_REDIRECT_URL = 'home'
 
-LOGIN_URL = 'must_authenticate'
+LOGIN_URL = 'account:must_authenticate'
 
 try:
     from django.contrib.messages import constants as messages

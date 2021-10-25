@@ -26,6 +26,7 @@ urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('account/', include('account.urls')),
     path('movie/', include('movie.urls')),
+    path('playlist/', include('playlist.urls')),
 
     # Password reset links (ref: https://github.com/django/django/blob/master/django/contrib/auth/views.py)
     path('password_change/done/',

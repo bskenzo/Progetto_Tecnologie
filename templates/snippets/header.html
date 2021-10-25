@@ -37,6 +37,7 @@
                     {% else %}
                         <a class="dropdown-item" href="{% url 'movie:my-list' %}">My list</a>
                     {% endif %}
+                    <a class="dropdown-item" href="{% url 'playlist:playlist' %}">My Playlist</a>
                     <a class="dropdown-item" href="{% url 'account:logout' %}">Logout</a>
                 </div>
             </div>
