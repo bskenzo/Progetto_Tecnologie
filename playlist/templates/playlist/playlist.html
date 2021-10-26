@@ -21,11 +21,11 @@
             </ul>
         {% endif %}
 
-        <button  type="button" class="btn btn-outline-primary mx-auto mb-4" data-target="#exampleModal"
+        <button  type="button" class="btn btn-outline-success mx-auto mb-4" data-target="#createModal"
                  data-toggle="modal">Create Playlist
         </button>
 
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -44,7 +44,7 @@
 
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Create</button>
+                                <button type="submit" class="btn btn-outline-success">Create</button>
                             </div>
 
                         </form>
@@ -53,19 +53,55 @@
             </div>
         </div>
 
-        <h1 class="display-4">Le Tue Playlist</h1>
+        <button  type="button" class="btn btn-outline-danger mx-auto mb-4" data-target="#deleteModal"
+                 data-toggle="modal">Delete Playlist
+        </button>
 
-        {% for playlist in playlists %}
-            {% if playlist.user_id == user.pk %}
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Select a Playlist</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="playlist" class="form-label">Playlist</label>
+                                <select name="playlist" required class="form-control" id="playlist">
+                                    {% for pl in playlists %}
+                                        <option>{{ pl.pk }}-{{ pl.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-outline-danger">Delete</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if playlists|length <= 0 %}
+            <h1>You have no playlist</h1>
+        {% else %}
+            <h1 class="display-4">Your playlist</h1>
+
+            {% for playlist in playlists %}
                 <div class="container my-4">
                     <h3 class="mt-4">{{ playlist.name }}</h3>
                     {% if playlist.film.all|length > 0 %}
                         <div class="main-gallery js-flickity"
                              data-flickity-options='{ "contain": true }'>
                             {% for film in playlist.film.all %}
-                                <div class="gallery-cell bg-image" style="background-image: url('{{ film.poster.url }}');
-                                        background-size: 146px 298px; background-repeat: no-repeat; background-position: center">
-                                    <a id="remove" href="{% url 'playlist:add-remove' operation='remove' pk=film.pk playlist_id=playlist.pk %}">Remove</a>
+                                <div onclick="location.href='{% url 'movie:film-detail' film.pk %}'" class="gallery-cell bg-image" style="background-image: url('{{ film.poster.url }}');
+                                        background-size: 146px 298px; background-repeat: no-repeat; background-position: center; cursor: pointer;">
+                                    <a style="color: red; background-color: whitesmoke" id="remove" href="{% url 'playlist:add-remove' operation='remove' pk=film.pk playlist_id=playlist.pk %}">Remove</a>
                                 </div>
                             {% endfor %}
                         </div>
@@ -73,8 +109,8 @@
                         <h5>Is empty</h5>
                     {% endif %}
                 </div>
-            {% endif %}
-        {% endfor %}
+            {% endfor %}
+        {% endif %}
     </div>
 
 

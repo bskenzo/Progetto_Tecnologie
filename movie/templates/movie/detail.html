@@ -41,41 +41,73 @@
                         {% endif %}
 
 
-                        <input id="toggle-heart" type="checkbox" data-target="#exampleModal" data-toggle="modal" />
-                        <label for="toggle-heart">❤</label>
+                        {% if playlist|length > 0 %}
+                            <input id="toggle-heart" type="checkbox" data-target="#exampleModal" data-toggle="modal"/>
+                            <label id="lab" class="right" for="toggle-heart" data-placement="bottom" title="Add a playlist">❤</label>
 
+                            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Select a Playlist</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form>
+                                                <div class="form-group">
+                                                    <label for="playlist" class="form-label">Playlist</label>
+                                                    <select name="playlist" required class="form-control" id="playlist">
+                                                        {% for pl in playlist %}
+                                                            <option>{{ pl.pk }}-{{ pl.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
 
-                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Select a Playlist</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form>
-                                            <div class="form-group">
-                                                <label for="playlist" class="form-label">Playlist</label>
-                                                <select name="playlist" required class="form-control" id="playlist">
-                                                    {% for pl in playlist %}
-                                                        <option>{{ pl.pk }}-{{ pl.name }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                <button type="submit" class="btn btn-primary">Add</button>
-                                            </div>
-                                        </form>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-outline-primary">Add</button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        {% else %}
+                            <input id="toggle-heart" type="checkbox" data-target="#exampleModal" data-toggle="modal"/>
+                            <label id="lab" class="right" for="toggle-heart" data-placement="bottom" title="Add a playlist">❤</label>
+
+
+                            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Select a Playlist</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form>
+                                                <div class="form-group">
+                                                    <label for="name" class="col-form-label">Playlist name:</label>
+                                                    <input type="text" value="Playlist" class="form-control" name="name" id="name">
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-outline-success">Create and Add</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </div>
+
 
 
                 <div class="card-footer text-muted">
@@ -131,5 +163,11 @@
             {% endfor %}
         </div>
     </div>
+
+    <script>
+        $(function () {
+            $('#lab').tooltip()
+        })
+    </script>
 
 {% endblock content %}

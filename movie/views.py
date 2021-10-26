@@ -54,9 +54,20 @@ class FilmDetailView(DetailView):
         try:
             playlist = request.GET
             playlist = playlist['playlist']
+            playlist = playlist.split('-')
             add_to_playlist(request, operation='add', pk=kwargs['pk'], playlist_id=playlist[0])
         except:
-            pass
+            try:
+                name = request.GET
+                name = name['name']
+                print(name)
+                pl = Playlist()
+                pl.name = name
+                pl.user_id = request.user.pk
+                pl.save()
+                add_to_playlist(request, operation='add', pk=kwargs['pk'], playlist_id=pl.pk)
+            except:
+                pass
 
         return super(FilmDetailView, self).get(request, *args, **kwargs)
 

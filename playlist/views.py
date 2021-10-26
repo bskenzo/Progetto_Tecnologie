@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.contrib import messages
 
 # Create your views here.
@@ -15,7 +15,7 @@ class PlaylistView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = {}
-        playlists = Playlist.objects.all()
+        playlists = Playlist.objects.filter(user_id=self.request.user.pk)
         context['playlists'] = playlists
 
         return context
@@ -28,7 +28,13 @@ class PlaylistView(LoginRequiredMixin, TemplateView):
             pl.user_id = request.user.pk
             pl.save()
         except:
-            pass
+            try:
+                playlist = request.GET
+                playlist = playlist['playlist']
+                playlist = playlist.split('-')
+                Playlist.objects.get(id=playlist[0]).delete()
+            except:
+                pass
 
         return super(PlaylistView, self).get(request, *args, **kwargs)
 
