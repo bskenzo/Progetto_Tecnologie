@@ -18,6 +18,7 @@ class FilmForm(forms.ModelForm):
             'poster',
             'release_date',
             'price',
+            'video'
         ]
 
 

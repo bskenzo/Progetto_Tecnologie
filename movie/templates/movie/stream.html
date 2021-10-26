@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <div class="container">
+        <h3 class="text-center my-5">{{ film.title }}</h3>
+        <div class="my-5 embed-responsive embed-responsive-21by9">
+            <video id="v" controls controlslist="nodownload">
+                <source src="{{ film.video.url }}" type="video/mp4" />
+            </video>
+        </div>
+    </div>
+
+    <script>
+        var v = document.getElementById('v');
+        v.addEventListener('canplaythrough', function(e) {
+            console.log(e.type, this.seekable.end(0));
+        });
+    </script>
+
+
+{% endblock %}

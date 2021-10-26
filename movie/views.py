@@ -20,7 +20,6 @@ stripe.api_key = "sk_test_51JjpSBH1UjLFf6ccnvnflqfD1NkLyfRXOC0OxKjvwi4sYv2I3bpSz
 
 
 class FilmCreateView(LoginRequiredMixin, CreateView):
-
     model = Film
     form_class = FilmForm
     template_name = 'movie/create.html'
@@ -40,7 +39,6 @@ class FilmCreateView(LoginRequiredMixin, CreateView):
 
 
 class FilmDetailView(DetailView):
-
     model = Film
     template_name = 'movie/detail.html'
 
@@ -112,6 +110,34 @@ class FilmDeleteView(LoginRequiredMixin, DeleteView):
         return redirect('home')
 
 
+class FilmStreamView(LoginRequiredMixin, DetailView):
+    model = Film
+    template_name = 'movie/stream.html'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        if not request.user.is_authenticated:
+            return redirect('account:must_authenticate')
+
+        context = {}
+        film = Film.objects.get(id=kwargs['pk'])
+        context['film'] = film
+
+        if request.user.is_subscribe == 'active':
+            return super(FilmStreamView, self).get(request, *args, context)
+
+        try:
+            my_list = MyList.objects.get(user_id=request.user.pk).film.all()
+            if film in my_list:
+                return super(FilmStreamView, self).get(request, *args, context)
+            else:
+                messages.error(request, "You didn't purchase this film")
+                return redirect('movie:film-detail', kwargs['pk'])
+        except:
+            messages.error(request, "You didn't purchase this film")
+            return redirect('movie:film-detail', kwargs['pk'])
+
+
 class MovieListView(ListView):
     model = Film
     template_name = 'movie/movielist.html'
@@ -146,7 +172,7 @@ class CheckoutView(UpdateView):
         if account.stripe_id != "id_test":
 
             stripe.PaymentIntent.create(
-                amount=int(float(product.price)*100),
+                amount=int(float(product.price) * 100),
                 currency="eur",
                 payment_method_types=["card"],
                 customer=account.stripe_id,
@@ -161,7 +187,7 @@ class CheckoutView(UpdateView):
                                                      source=request.POST['stripeToken'])
 
             stripe.PaymentIntent.create(
-                amount=int(float(product.price)*100),
+                amount=int(float(product.price) * 100),
                 currency="eur",
                 payment_method_types=["card"],
                 customer=stripe_customer.stripe_id,
@@ -203,12 +229,11 @@ class CheckoutView(UpdateView):
             amount = float(prod.price)
             amount_html = prod.price
 
-        return render(request, 'movie/payments/checkout.html', {'film': film, 'amount': amount*100,
+        return render(request, 'movie/payments/checkout.html', {'film': film, 'amount': amount * 100,
                                                                 'amount_html': amount_html, 'prod': prod})
 
 
 class ReviewCreateView(LoginRequiredMixin, CreateView):
-
     model = Review
     form_class = ReviewForm
     template_name = 'movie/createreview.html'
@@ -241,7 +266,6 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
 
 
 class ReviewUpdateView(LoginRequiredMixin, AuthorRequiredMixin, UpdateView):
-
     model = Review
     form_class = ReviewForm
     template_name = 'movie/updatereview.html'
