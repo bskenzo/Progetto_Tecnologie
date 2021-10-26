@@ -35,9 +35,14 @@
                     {% if user.is_authenticated %}
 
                         {% if user.is_subscribe == 'active' %}
+                            <a href="{% url 'movie:stream-film' object.pk %}" class="btn btn-outline-primary">Watch me</a>
                             <a href="{% url 'movie:create-review' object.pk %}" class="btn btn-outline-primary">Review</a>
                         {% else %}
-                            <a href="{% url 'movie:checkout' %}?price={{ object.pk }}" class="btn btn-outline-success">Buy for {{ object.price }} €</a>
+                            {% if movie %}
+                                <a href="{% url 'movie:stream-film' object.pk %}" class="btn btn-outline-primary">Watch me</a>
+                            {% else %}
+                                <a href="{% url 'movie:checkout' %}?price={{ object.pk }}" class="btn btn-outline-success">Buy for {{ object.price }} €</a>
+                            {% endif %}
                         {% endif %}
 
 

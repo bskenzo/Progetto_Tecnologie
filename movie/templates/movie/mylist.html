@@ -8,25 +8,29 @@
 
 {% block content %}
 
-    <div class="container-fluid">
-        <div class="row ">
-            {% for film in films %}
-                <div class="col-sm-3 my-2">
-                    <div id="list" class="card m-auto lead">
-                        <img class="card-img-top" src="{{ film.poster.url }}" alt="" height="300px">
-                        <div class="card-body">
-                            <a href="{% url 'movie:film-detail' film.pk %}" class="card-title h3">{{ film.title }}</a>
-                            <p class="card-text">{{ film }} € </p>
-                        </div>
-                        <div class="card-footer text-muted">
-                            Director: {{ film.director }}
-                            <span class="right">{{ film.release_date }}</span>
+    {% if films|length > 0 %}
+        <div class="container-fluid">
+            <div class="row ">
+                {% for film in films %}
+                    <div class="col-sm-3 my-2">
+                        <div id="list" class="card m-auto lead">
+                            <img class="card-img-top" src="{{ film.poster.url }}" alt="" height="300px">
+                            <div class="card-body">
+                                <a href="{% url 'movie:stream-film' film.pk%}" class="card-title h3">{{ film.title }}</a>
+                                <p class="card-text">{{ film }} € </p>
+                            </div>
+                            <div class="card-footer text-muted">
+                                Director: {{ film.director }}
+                                <span class="right">{{ film.release_date }}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
-    </div>
+    {% else %}
+        <h3 class="text-center">You haven't purchased any movies</h3>
+    {% endif %}
 {% endblock %}
 
 

@@ -35,7 +35,7 @@
                     {% if user.is_staff %}
                         <a class="dropdown-item" href="{% url 'movie:create-view' %}">Add film</a>
                     {% else %}
-                        <a class="dropdown-item" href="{% url 'movie:my-list' %}">My list</a>
+                        <a class="dropdown-item" href="{% url 'movie:my-list' %}">Purchased Film</a>
                     {% endif %}
                     <a class="dropdown-item" href="{% url 'playlist:playlist' %}">My Playlist</a>
                     <a class="dropdown-item" href="{% url 'account:logout' %}">Logout</a>

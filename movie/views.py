@@ -46,6 +46,13 @@ class FilmDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['review'] = Review.objects.all()
         context['playlist'] = Playlist.objects.filter(user_id=self.request.user.pk)
+        try:
+            my_purchase = MyList.objects.get(user_id=self.request.user.pk).film.all()
+            film = Film.objects.get(id=self.kwargs['pk'])
+            if film in my_purchase:
+                context['movie'] = film
+        except:
+            pass
         return context
 
     def get(self, request, *args, **kwargs):
@@ -81,10 +88,22 @@ class FilmUpdateView(LoginRequiredMixin, UpdateView):
         context = {'prod': prod, 'choices': CATEGORY_CHOICES}
 
         if request.method == "POST":
-            if len(request.FILES) != 0:
-                if len(prod.poster) > 0:
+            if request.FILES is not None:
+                print('sono qui')
+                try:
+                    _ = request.FILES['image']
                     os.remove(prod.poster.path)
-                prod.poster = request.FILES['image']
+                    prod.poster = request.FILES['image']
+                except:
+                    pass
+
+                try:
+                    _ = request.FILES['video']
+                    os.remove(prod.video.path)
+                    prod.video = request.FILES['video']
+                except:
+                    pass
+
             prod.title = request.POST.get('title')
             prod.genre = request.POST.get('genre')
             prod.director = request.POST.get('director')
@@ -150,8 +169,12 @@ class MyListView(LoginRequiredMixin, ListView):
     context_object_name = 'films'
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        account = Account.objects.get(email=self.request.user.email)
-        my_list = MyList.objects.get(user_id=account.pk).film.all()
+        try:
+            account = Account.objects.get(email=self.request.user.email)
+            my_list = MyList.objects.get(user_id=account.pk).film.all()
+        except:
+            my_list = {}
+            pass
         return super(MyListView, self).get_context_data(object_list=my_list)
 
 
