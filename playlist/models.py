@@ -8,7 +8,5 @@ from movie.models import Film
 class Playlist(models.Model):
     name = models.CharField(max_length=25)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    film = models.ManyToManyField(Film, blank=True, null=True)
+    film = models.ManyToManyField(Film)
 
-    def __str__(self):
-        return f'{self.name}, Account: {self.user}'

@@ -12,7 +12,9 @@ from django.shortcuts import render, redirect
 from account.models import Account
 from movie.forms import FilmForm, ReviewForm
 from movie.mixins import AuthorRequiredMixin
-from movie.models import Film, CATEGORY_CHOICES, Review
+from movie.models import Film, CATEGORY_CHOICES, Review, MyList
+from playlist.models import Playlist
+from playlist.views import add_to_playlist
 
 stripe.api_key = "sk_test_51JjpSBH1UjLFf6ccnvnflqfD1NkLyfRXOC0OxKjvwi4sYv2I3bpSz5Deiu7dgP0296tb8dy5OuwT7sXjJjZBBjWx00c3Hiu3VB"
 
@@ -45,7 +47,18 @@ class FilmDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['review'] = Review.objects.all()
+        context['playlist'] = Playlist.objects.filter(user_id=self.request.user.pk)
         return context
+
+    def get(self, request, *args, **kwargs):
+        try:
+            playlist = request.GET
+            playlist = playlist['playlist']
+            add_to_playlist(request, operation='add', pk=kwargs['pk'], playlist_id=playlist[0])
+        except:
+            pass
+
+        return super(FilmDetailView, self).get(request, *args, **kwargs)
 
 
 class FilmUpdateView(LoginRequiredMixin, UpdateView):
@@ -94,18 +107,15 @@ class MovieListView(ListView):
     context_object_name = 'films'
 
 
-class MyListView(TemplateView):
-    # model = Mylist
+class MyListView(LoginRequiredMixin, ListView):
+    model = Account
     template_name = 'movie/mylist.html'
     context_object_name = 'films'
 
-    # # def get_context_data(self, **kwargs):
-    # #     context = super().get_context_data(**kwargs)
-    # #     a = Film.objects.filter(email=user.email).first()
-    # #     context['review'] = Film.objects.all()
-    # #     return context
-    # def dispatch(self, request, *args, **kwargs):
-    #     a = Mylist.objects.filter(id=).first()
+    def get_context_data(self, *, object_list=None, **kwargs):
+        account = Account.objects.get(email=self.request.user.email)
+        my_list = MyList.objects.get(user_id=account.pk).film.all()
+        return super(MyListView, self).get_context_data(object_list=my_list)
 
 
 class CheckoutView(UpdateView):
@@ -154,12 +164,22 @@ class CheckoutView(UpdateView):
             account.stripe_id = stripe_customer.id
             account.save()
 
+        try:
+            a = MyList.objects.get(user_id=account.pk)
+            a.film.add(product)
+        except:
+            b = MyList()
+            print(b)
+            b.user_id = account.pk
+            b.save()
+            b.film.add(product)
+
         messages.add_message(
             self.request, messages.SUCCESS,
             'Payment successfully!'
         )
 
-        return redirect('home')
+        return redirect('movie:my-list')
 
     def get(self, request, *args, **kwargs):
 
@@ -174,14 +194,6 @@ class CheckoutView(UpdateView):
 
         return render(request, 'movie/payments/checkout.html', {'film': film, 'amount': amount*100,
                                                                 'amount_html': amount_html, 'prod': prod})
-
-# class TopListView(LoginRequiredMixin, ListView):
-#     model = Review
-#     template_name = 'movie/toplist.html'
-#     context_object_name = 'films'
-#
-#     def get_queryset(self):
-#         return Film.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
 
 
 class ReviewCreateView(LoginRequiredMixin, CreateView):

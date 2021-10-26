@@ -16,7 +16,7 @@ CATEGORY_CHOICES = (
 
 
 class Film(models.Model):
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=20)
     genre = models.CharField(max_length=25, choices=CATEGORY_CHOICES)
     director = models.CharField(max_length=250)
     plot = models.TextField(max_length=250)
@@ -41,3 +41,8 @@ class Review(models.Model):
 
     def __str__(self):
         return f'{self.writer} -- {self.reviewed_film_id}'
+
+
+class MyList(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    film = models.ManyToManyField(Film)

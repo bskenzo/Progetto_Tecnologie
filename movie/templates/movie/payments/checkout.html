@@ -23,8 +23,8 @@
                 </ul>
 
                 <div class="text-center pt-3">
-                    <form action="{% url 'movie:checkout' %}?price={{ prod.id }}" method="POST">
-                        {% csrf_token %}
+                    <form action="{% url 'movie:checkout' %}?price={{ prod.id }}" method="POST">{% csrf_token %}
+                        <a href="{% url 'movie:film-detail' prod.id %}" class="btn btn-outline-primary">Cancel</a>
                         <script
                                 src="https://checkout.stripe.com/checkout.js" class="stripe-button"
                                 data-key="pk_test_51JjpSBH1UjLFf6ccLdFhC7Ylt8ck2sAGYbVfENTQPuOeS2ALM0DjGYwlkLA8kSHB75uyvBNMsZx1ci8y2YoCeaXL00iaQWUyBO"

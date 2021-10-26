@@ -1,1 +1,32 @@
-{#{% include 'movie/snippets/list_snippet.html' %}#}
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    <div class="container-fluid">
+        <div class="row ">
+            {% for film in films %}
+                <div class="col-sm-3 my-2">
+                    <div id="list" class="card m-auto lead">
+                        <img class="card-img-top" src="{{ film.poster.url }}" alt="" height="300px">
+                        <div class="card-body">
+                            <a href="{% url 'movie:film-detail' film.pk %}" class="card-title h3">{{ film.title }}</a>
+                            <p class="card-text">{{ film }} € </p>
+                        </div>
+                        <div class="card-footer text-muted">
+                            Director: {{ film.director }}
+                            <span class="right">{{ film.release_date }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+

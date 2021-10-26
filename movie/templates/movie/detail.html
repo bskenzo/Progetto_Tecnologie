@@ -31,16 +31,53 @@
                         <a href="{% url 'movie:delete-film' object.pk %}" class="btn btn-outline-danger">Delete</a>
                         <a href="{% url 'movie:checkout' %}?price={{ object.pk }}" class="btn btn-outline-success my-2">Test buy</a>
                     {% endif %}
-                    {% if user.is_subscribe == 'active'%}
-                        <a href="{% url 'movie:create-review' object.pk %}" class="btn btn-outline-primary">Review</a>
-                        <a href="{% url 'playlist:add-remove' operation='add' playlist_id=2 pk=object.pk %}" class="btn btn-outline-primary">add</a>
-                        <a href="{% url 'playlist:add-remove' operation='remove' playlist_id=2 pk=object.pk %}" class="btn btn-outline-danger">remove</a>
-                    {% else %}
-                        <a href="{% url 'movie:checkout' %}?price={{ object.pk }}" class="btn btn-outline-success">Buy for {{ object.price }} €</a>
-                        <a href="{% url 'playlist:add-remove' operation='add' playlist_id=2 pk=object.pk %}" class="btn btn-outline-primary">add</a>
-                        <a href="{% url 'playlist:add-remove' operation='remove' playlist_id=2 pk=object.pk %}" class="btn btn-outline-danger">remove</a>
+
+                    {% if user.is_authenticated %}
+
+                        {% if user.is_subscribe == 'active' %}
+                            <a href="{% url 'movie:create-review' object.pk %}" class="btn btn-outline-primary">Review</a>
+                        {% else %}
+                            <a href="{% url 'movie:checkout' %}?price={{ object.pk }}" class="btn btn-outline-success">Buy for {{ object.price }} €</a>
+                        {% endif %}
+
+
+                        <input id="toggle-heart" type="checkbox" data-target="#exampleModal" data-toggle="modal" />
+                        <label for="toggle-heart">❤</label>
+
+
+                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Select a Playlist</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form>
+                                            <div class="form-group">
+                                                <label for="playlist" class="form-label">Playlist</label>
+                                                <select name="playlist" required class="form-control" id="playlist">
+                                                    {% for pl in playlist %}
+                                                        <option>{{ pl.pk }}-{{ pl.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-primary">Add</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
+
+
                 <div class="card-footer text-muted">
                     Director: {{ object.director }}
                     <span class="right">{{ object.release_date }}</span>
