@@ -23,8 +23,9 @@
                 <img class="card-img-top" src="{{ object.poster.url }}" alt="">
                 <div class="card-body my-2">
                     <h2 class="card-title">{{ object.title }} - {{ object.director }}</h2>
-                    <p class="card-text">{{ object.genre }}</p>
+                    <p class="card-text">{{ object.genre | capfirst}}</p>
                     <p class="card-text">{{ object.plot }}</p>
+                    <p class="card-text">{{ rating }}</p>
 
                     {% if user.is_staff %}
                         <a href="{% url 'movie:update-film' object.pk %}" class="btn btn-outline-primary">Update</a>

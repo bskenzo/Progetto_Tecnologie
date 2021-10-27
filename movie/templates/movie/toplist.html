@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/playlist.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css" >
+    <script src="https://unpkg.com/flickity@2/dist/flickity.pkgd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row ">
+            <div class="container my-4">
+                <h3 class="mt-4">{{ film.title }}</h3>
+                <div class="main-gallery js-flickity"
+                    data-flickity-options='{ "contain": true }'>
+                    {% for film in films %}
+                        <div onclick="location.href='{% url 'movie:film-detail' film.pk %}'" class="gallery-cell bg-image" style="background-image: url('{{ film.poster.url }}');
+                            background-size: 146px 298px; background-repeat: no-repeat; background-position: center; cursor: pointer;">
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -3,8 +3,10 @@ import os
 import stripe
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Avg
+from django.http import Http404
 from django.urls import reverse_lazy, reverse
-from django.views.generic import CreateView, DetailView, UpdateView, DeleteView, TemplateView
+from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.shortcuts import render, redirect
 
@@ -125,6 +127,7 @@ class FilmDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         film = Film.objects.get(id=self.get_object().pk)
         film.poster.delete()
+        film.video.delete()
         film.delete()
         return redirect('home')
 
@@ -161,6 +164,29 @@ class MovieListView(ListView):
     model = Film
     template_name = 'movie/movielist.html'
     context_object_name = 'films'
+
+
+class TopListView(ListView):
+    model = Review
+    template_name = "movie/toplist.html"
+    context_object_name = "films"
+
+    def get_queryset(self):
+        return Film.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
+        # return Film.objects.all().order_by('price') Ordina in base al prezzo
+
+
+class GenreListView(ListView):
+    model = Film
+    template_name = "movie/genre.html"
+    context_object_name = "films"
+
+    def get_queryset(self):
+        genre = Film.objects.filter(genre__contains=self.kwargs["genre"])
+        if genre:
+            return Film.objects.filter(genre__contains=self.kwargs["genre"])
+        else:
+            raise Http404
 
 
 class MyListView(LoginRequiredMixin, ListView):

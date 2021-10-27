@@ -37,7 +37,6 @@ class Review(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
     rating = models.IntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(5)])
-    spoiler = models.BooleanField(default=False)
     date_posted = models.DateTimeField(auto_now_add=True, verbose_name="date published")
 
     def __str__(self):
