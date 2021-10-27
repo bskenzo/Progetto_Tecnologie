@@ -203,6 +203,13 @@ class MyListView(LoginRequiredMixin, ListView):
             pass
         return super(MyListView, self).get_context_data(object_list=my_list)
 
+    def get(self, request, *args, **kwargs):
+
+        if request.user.is_subscribe == 'active':
+            return redirect('home')
+
+        return super(MyListView, self).get(request, *args, **kwargs)
+
 
 class CheckoutView(LoginRequiredMixin, UpdateView):
 
