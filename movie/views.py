@@ -68,7 +68,6 @@ class FilmDetailView(DetailView):
             try:
                 name = request.GET
                 name = name['name']
-                print(name)
                 pl = Playlist()
                 pl.name = name
                 pl.user_id = request.user.pk
@@ -92,7 +91,6 @@ class FilmUpdateView(LoginRequiredMixin, UpdateView):
 
         if request.method == "POST":
             if request.FILES is not None:
-                print('sono qui')
                 try:
                     _ = request.FILES['image']
                     os.remove(prod.poster.path)
@@ -140,7 +138,8 @@ class FilmStreamView(LoginRequiredMixin, DetailView):
     def dispatch(self, request, *args, **kwargs):
 
         if not request.user.is_authenticated:
-            return redirect('account:must_authenticate')
+            next_page = f'?next=/movie/{kwargs["pk"]}/streaming'
+            return redirect(reverse('account:must_authenticate') + next_page)
 
         context = {}
         film = Film.objects.get(id=kwargs['pk'])
@@ -205,7 +204,7 @@ class MyListView(LoginRequiredMixin, ListView):
         return super(MyListView, self).get_context_data(object_list=my_list)
 
 
-class CheckoutView(UpdateView):
+class CheckoutView(LoginRequiredMixin, UpdateView):
 
     def post(self, request, *args, **kwargs):
 
@@ -252,14 +251,13 @@ class CheckoutView(UpdateView):
             account.save()
 
         try:
-            a = MyList.objects.get(user_id=account.pk)
-            a.film.add(product)
+            my_list = MyList.objects.get(user_id=account.pk)
+            my_list.film.add(product)
         except:
-            b = MyList()
-            print(b)
-            b.user_id = account.pk
-            b.save()
-            b.film.add(product)
+            model = MyList()
+            model.user_id = account.pk
+            model.save()
+            model.film.add(product)
 
         messages.add_message(
             self.request, messages.SUCCESS,
@@ -273,11 +271,18 @@ class CheckoutView(UpdateView):
         film = 'No_Choice'
         amount = 0.00
         amount_html = 0.00
-        if request.method == 'GET' and 'price' in request.GET:
+        prod = None
+
+        try:
             prod = Film.objects.get(id=request.GET['price'])
             film = prod.title
             amount = float(prod.price)
             amount_html = prod.price
+        except:
+            pass
+
+        if prod is None:
+            raise Http404
 
         return render(request, 'movie/payments/checkout.html', {'film': film, 'amount': amount * 100,
                                                                 'amount_html': amount_html, 'prod': prod})
@@ -293,9 +298,11 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
 
         user = request.user
         if not user.is_authenticated:
-            return redirect('account:must_authenticate')
+            next_page = f'?next=/movie/{kwargs["pk"]}/create-review/'
+            return redirect(reverse('account:must_authenticate') + next_page)
 
         if user.is_subscribe == 'not_active':
+            messages.info(request, 'You must be subscribe')
             return redirect('account:pricing')
 
         form = ReviewForm(request.POST or None, request.FILES or None)
@@ -304,7 +311,6 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
             writer = Account.objects.filter(email=user.email).first()
             reviewed_film = kwargs['pk']
             obj.writer = writer
-            print(obj)
             obj.reviewed_film_id = reviewed_film
             obj.save()
             return redirect('movie:film-detail', kwargs['pk'])

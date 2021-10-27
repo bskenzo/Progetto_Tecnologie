@@ -13,14 +13,6 @@
 
     <div class="container text-center">
 
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
-                {% endfor %}
-            </ul>
-        {% endif %}
-
         <button  type="button" class="btn btn-outline-success mx-auto mb-4" data-target="#createModal"
                  data-toggle="modal">Create Playlist
         </button>

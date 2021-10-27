@@ -3,14 +3,6 @@
 
 {% block content %}
 
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
     <div class="d-flex flex-column">
         <h4 class="m-auto" style="color: red">You are going to delete your account.</h4>
         <h4 class="m-auto" style="color: red">Are you sure?</h4>

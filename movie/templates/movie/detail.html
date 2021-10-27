@@ -9,14 +9,6 @@
 
     <div class="container">
 
-        {% if messages %}
-            <ul class="messages text-center" >
-                {% for message in messages %}
-                    <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
-                {% endfor %}
-            </ul>
-        {% endif %}
-
         <div class="row">
             <!-- Film post -->
             <div class="card m-auto">
@@ -123,6 +115,8 @@
                                 </div>
                             </div>
                         {% endif %}
+                    {% else %}
+                        <a href="{% url 'account:must_authenticate' %}?next={% url 'movie:checkout' %}?price={{ object.pk }}" class="btn btn-outline-success">Buy for {{ object.price }} €</a>
                     {% endif %}
                 </div>
 

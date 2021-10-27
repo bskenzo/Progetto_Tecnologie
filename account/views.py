@@ -9,7 +9,7 @@ from django.contrib.auth import logout, update_session_auth_hash, login, authent
 from django.views.generic import CreateView, TemplateView, UpdateView, DeleteView
 
 from account.forms import RegistrationForm, AccountAuthenticationForm, AccountUpdateForm
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from account.models import Account
 import stripe
 
@@ -21,12 +21,19 @@ class RegisterUser(CreateView):
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
+
+        try:
+            self.success_url = self.request.GET['next']
+        except:
+            pass
+
         to_return = super().form_valid(form)
         user = authenticate(
             email=form.cleaned_data["email"],
             password=form.cleaned_data["password1"],
         )
         login(self.request, user)
+
         return to_return
 
 
@@ -47,6 +54,15 @@ class LoginUser(LoginView):
 
     form_class = AccountAuthenticationForm
     template_name = 'account/login.html'
+    success_url = reverse_lazy('home')
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.success_url = request.GET['next']
+        except:
+            pass
+
+        return super(LoginUser, self).get(request, *args, **kwargs)
 
 
 class UpdateUser(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
@@ -63,7 +79,8 @@ class UpdateUser(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         session = None
 
         if not request.user.is_authenticated:
-            return redirect('account:must_authenticate')
+            next_page = f'?next=/account/'
+            return redirect(reverse('account:must_authenticate') + next_page)
 
         if request.user.stripe_id != "id_test":
             session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions'])
@@ -111,6 +128,15 @@ class MustAuthenticate(TemplateView):
 
     template_name = 'account/must_authenticate.html'
 
+    def get(self, request, *args, **kwargs):
+        try:
+            context = {'next': self.request.GET['next']}
+            kwargs.update(context)
+            print(kwargs)
+        except:
+            pass
+        return super(MustAuthenticate, self).get(request, *args, **kwargs)
+
 
 class DeleteAccountView(LoginRequiredMixin, DeleteView):
 
@@ -131,14 +157,11 @@ class PricingView(TemplateView):
     template_name = 'account/subscribe.html'
 
 
-class CheckoutView(UpdateView):
+class CheckoutView(LoginRequiredMixin, UpdateView):
 
     template_name = 'account/payments/checkout.html'
 
     def post(self, request, *args, **kwargs):
-
-        if not request.user.is_authenticated:
-            return redirect('account:must_authenticate')
 
         coupons = {'christmas': 20, 'easter': 10, 'epiphany': 5}
 

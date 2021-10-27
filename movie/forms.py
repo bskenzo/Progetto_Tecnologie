@@ -23,6 +23,7 @@ class FilmForm(forms.ModelForm):
 
 
 class ReviewForm(forms.ModelForm):
+    rating = forms.IntegerField(widget=forms.NumberInput(attrs={'min': '1', 'max': '5', 'value': '1'}))
 
     class Meta:
         model = Review
