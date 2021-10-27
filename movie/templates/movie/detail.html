@@ -25,7 +25,19 @@
                     <h2 class="card-title">{{ object.title }} - {{ object.director }}</h2>
                     <p class="card-text">{{ object.genre | capfirst}}</p>
                     <p class="card-text">{{ object.plot }}</p>
-                    <p class="card-text">{{ rating }}</p>
+                    <div class="d-flex">
+                        {% if rating.rating__avg is not None%}
+                            <div class="green-tab p-2 px-3 ">
+                                <p class="sm-text mb-0">OVERALL RATING</p>
+                                <h4>{{ rating.rating__avg }}</h4>
+                            </div>
+                        {% else %}
+                            <div class="gray-tab p-2 px-3 ">
+                                <p class="sm-text mb-0">OVERALL RATING</p>
+                                <h4>N/A</h4>
+                            </div>
+                        {% endif %}
+                    </div>
 
                     {% if user.is_staff %}
                         <a href="{% url 'movie:update-film' object.pk %}" class="btn btn-outline-primary">Update</a>

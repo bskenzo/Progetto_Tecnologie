@@ -12,12 +12,6 @@
     letter-spacing: 1px
 }
 
-.green-tab {
-    background-color: #00C853;
-    color: #fff;
-    border-radius: 5px;
-}
-
 .grey-text {
     color: #BDBDBD
 }
@@ -29,6 +23,12 @@
 .sm-text {
     font-size: 10px;
     letter-spacing: 1px
+}
+
+.gray-tab {
+    background-color: lightslategray;
+    color: #fff;
+    border-radius: 5px;
 }
 
 .green-tab {

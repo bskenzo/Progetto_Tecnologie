@@ -48,6 +48,7 @@ class FilmDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['review'] = Review.objects.all()
         context['playlist'] = Playlist.objects.filter(user_id=self.request.user.pk)
+        context['rating'] = Review.objects.filter(reviewed_film_id=self.kwargs['pk']).aggregate(Avg('rating'))
         try:
             my_purchase = MyList.objects.get(user_id=self.request.user.pk).film.all()
             film = Film.objects.get(id=self.kwargs['pk'])
