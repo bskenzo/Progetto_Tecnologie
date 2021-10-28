@@ -27,6 +27,7 @@ urlpatterns = [
     path('account/', include('account.urls')),
     path('movie/', include('movie.urls')),
     path('playlist/', include('playlist.urls')),
+    path('post/', include('post.urls')),
 
     # Password reset links (ref: https://github.com/django/django/blob/master/django/contrib/auth/views.py)
     path('password_change/done/',

@@ -3,6 +3,18 @@
     max-height: 100%;
 }
 
+.container-flex{
+    display: flex;
+    margin-left: 2vw;
+    padding-left: 1vw;
+}
+
+.filter_by{
+    background-color: #CBCBCB;
+    width: 250px;
+    height: 100%
+}
+
 .container {
     padding: 20px;
 }

@@ -34,8 +34,9 @@
                     <a class="dropdown-item" href="{% url 'account:account' %}">Settings</a>
                     {% if user.is_staff %}
                         <a class="dropdown-item" href="{% url 'movie:create-view' %}">Add film</a>
+                        <a class="dropdown-item" href="{% url 'movie:watch-list' %}">Watch List</a>
                     {% elif user.is_subscribe == 'active' %}
-
+                        <a class="dropdown-item" href="{% url 'movie:watch-list' %}">Watch List</a>
                     {% else %}
                         <a class="dropdown-item" href="{% url 'movie:my-list' %}">Purchased Film</a>
                     {% endif %}

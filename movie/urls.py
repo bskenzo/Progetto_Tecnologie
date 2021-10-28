@@ -2,7 +2,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import path
 
 from movie.views import FilmCreateView, FilmDetailView, FilmUpdateView, FilmDeleteView, MovieListView, CheckoutView, \
-    MyListView, ReviewCreateView, ReviewUpdateView, ReviewDeleteView, FilmStreamView, TopListView, GenreListView
+    MyListView, ReviewCreateView, ReviewUpdateView, ReviewDeleteView, FilmStreamView, TopListView, GenreListView, \
+    WatchListView
 
 app_name = 'movie'
 
@@ -16,6 +17,7 @@ urlpatterns = [
     path('list/', MovieListView.as_view(), name='list'),
     path('list/top/', TopListView.as_view(), name='top'),
     path('mylist/', MyListView.as_view(), name='my-list'),
+    path('watchlist/', WatchListView.as_view(), name='watch-list'),
     path('checkout/', CheckoutView.as_view(), name='checkout'),
     path('<int:pk>/create-review/', ReviewCreateView.as_view(), name='create-review'),
     path('<int:pk>/update-review/', ReviewUpdateView.as_view(), name='update-review'),

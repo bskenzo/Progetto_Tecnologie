@@ -165,6 +165,11 @@ class MovieListView(ListView):
     template_name = 'movie/movielist.html'
     context_object_name = 'films'
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['choices'] = CATEGORY_CHOICES
+        return context
+
 
 class TopListView(ListView):
     model = Review
@@ -209,6 +214,19 @@ class MyListView(LoginRequiredMixin, ListView):
             return redirect('home')
 
         return super(MyListView, self).get(request, *args, **kwargs)
+
+
+class WatchListView(LoginRequiredMixin, ListView):
+    model = Account
+    template_name = 'movie/watchlist.html'
+    context_object_name = 'films'
+
+    def get(self, request, *args, **kwargs):
+
+        if request.user.is_subscribe == 'not_active':
+            return redirect('movie:my-list')
+
+        return super(WatchListView, self).get(request, *args, **kwargs)
 
 
 class CheckoutView(LoginRequiredMixin, UpdateView):
