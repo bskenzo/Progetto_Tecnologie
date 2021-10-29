@@ -132,7 +132,6 @@ class MustAuthenticate(TemplateView):
         try:
             context = {'next': self.request.GET['next']}
             kwargs.update(context)
-            print(kwargs)
         except:
             pass
         return super(MustAuthenticate, self).get(request, *args, **kwargs)
@@ -155,6 +154,14 @@ class DeleteAccountView(LoginRequiredMixin, DeleteView):
 class PricingView(TemplateView):
 
     template_name = 'account/subscribe.html'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            context = {'next': self.request.GET['next']}
+            kwargs.update(context)
+        except:
+            pass
+        return super(PricingView, self).get(request, *args, **kwargs)
 
 
 class CheckoutView(LoginRequiredMixin, UpdateView):
@@ -199,7 +206,7 @@ class CheckoutView(LoginRequiredMixin, UpdateView):
 
                 session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions']) # recuperiamo la sessione aggiornata
                 customer = request.user
-                customer.is_subscribe = True
+                customer.is_subscribe = 'active'
                 customer.stripe_subscription_id = subscription.id
                 customer.expire_date = datetime.fromtimestamp(session.subscriptions.data[0].cancel_at).strftime('%Y-%m-%d')
                 customer.save()
@@ -244,11 +251,16 @@ class CheckoutView(LoginRequiredMixin, UpdateView):
 
             customer = request.user
             customer.stripe_id = stripe_customer.id
-            customer.is_subscribe = True
+            customer.is_subscribe = 'active'
             customer.stripe_subscription_id = subscription.id
             session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions'])
             customer.expire_date = datetime.fromtimestamp(session.subscriptions.data[0].cancel_at).strftime('%Y-%m-%d')
             customer.save()
+
+        try:
+            return redirect(request.GET['next'])
+        except:
+            pass
 
         return redirect('home')
 
@@ -277,7 +289,13 @@ class CheckoutView(LoginRequiredMixin, UpdateView):
                 coupon_amount = str(coupon_price)
                 final_amount = str(round(amount, 2))
 
+        try:
+            next_page = request.GET['next']
+        except:
+            next_page = ''
+
         return render(request, 'account/payments/checkout.html', {'price': price, 'amount': amount*100,
                                                                   'coupon': coupon, 'coupon_amount': coupon_amount,
                                                                   'final_amount': final_amount,
-                                                                  'original_amount': original_amount})
+                                                                  'original_amount': original_amount,
+                                                                  'next': next_page})

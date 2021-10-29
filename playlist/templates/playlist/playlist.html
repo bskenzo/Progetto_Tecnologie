@@ -28,7 +28,7 @@
                     </div>
 
                     <div class="modal-body">
-                        <form>
+                        <form method="POST">{% csrf_token %}
                             <div class="form-group">
                                 <label for="name" class="col-form-label">Playlist name:</label>
                                 <input type="text" class="form-control" name="name" id="name">
@@ -59,7 +59,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form>
+                        <form method="POST">{% csrf_token %}
                             <div class="form-group">
                                 <label for="playlist" class="form-label">Playlist</label>
                                 <select name="playlist" required class="form-control" id="playlist">

@@ -91,11 +91,6 @@
         }
     </style>
 
-
-
-
-
-
     <div class="container">
 
         <div class="row">
@@ -188,7 +183,7 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <form>
+                                            <form method="POST">{% csrf_token %}
                                                 <div class="form-group">
                                                     <label for="name" class="col-form-label">Playlist name:</label>
                                                     <input type="text" value="Playlist" class="form-control" name="name" id="name">
@@ -217,58 +212,74 @@
                 </div>
             </div>
 
-            <div class="container">
-                <a class="align-items-center" type="button" href="#myDIV" onclick="myFunction()">Show Comments</a>
-                <div id="myDIV" style="display: none">
-                    <div class="mt-5 mb-5">
-                        <div class="row d-flex align-items-center justify-content-center">
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="p-2">
-                                        <div class="comments">
-                                            {% for post in posts %}
-                                                {% if post.spoiler %}
-                                                    <a class="align-items-center" type="button" href="#divspo" onclick="showspoiler()">Show spoiler</a>
-                                                    <div class="d-flex flex-row" id="divspo" style="display: none">
-                                                        <div class="d-flex flex-column ml-2">
-                                                            <span class="name">{{ post.user.username }}</span>
-                                                            <p class="comment-text">{{ post.comment }}</p>
-                                                            <div class="d-flex flex-row align-items-center status">
-                                                                <small>Reply</small>
-                                                                {% if user.is_staff %}
-                                                                    <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
-                                                                {% elif post.user == user %}
-                                                                    <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+            {% if user.is_authenticated %}
+                <div class="container">
+                    <form id="contact-form" method="POST">{% csrf_token %}
+                        {% if user.spoiler %}
+                            <input type="checkbox" id="checkbox" name="checkbox" onclick="spoiler()" checked>
+                        {% else %}
+                            <input type="checkbox" id="checkbox" name="checkbox" onclick="spoiler()">
+                        {% endif %}
+                        <label for="checkbox" class="text-danger">Do you want spoiler?</label><br>
+                    </form>
+                    <a class="align-items-center" type="button" href="#myDIV" onclick="myFunction()">Show Comments</a>
+                    <div id="myDIV" style="display: none">
+                        <div class="mt-5 mb-5">
+                            <div class="row d-flex align-items-center justify-content-center">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="p-2">
+                                            <div class="comments">
+                                                {% for post in posts %}
+                                                    {% if user.spoiler %}
+                                                        <div class="d-flex flex-row">
+                                                            <div class="d-flex flex-column ml-2">
+                                                                {% if post.spoiler %}
+                                                                    <span class="name">{{ post.user.username }} - <span style="color: red">SPOILER</span></span>
+                                                                {% else %}
+                                                                    <span class="name">{{ post.user.username }}</span>
                                                                 {% endif %}
+                                                                <p class="comment-text">{{ post.comment }}</p>
+                                                                <div class="d-flex flex-row align-items-center status">
+                                                                    <small>Reply</small>
+                                                                    {% if user.is_staff %}
+                                                                        <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                    {% elif post.user == user %}
+                                                                        <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                    {% endif %}
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                {% else %}
-                                                    <div class="d-flex flex-row">
-                                                        <div class="d-flex flex-column ml-2">
-                                                            <span class="name">{{ post.user.username }}</span>
-                                                            <p class="comment-text">{{ post.comment }}</p>
-                                                            <div class="d-flex flex-row align-items-center status">
-                                                                <small>Reply</small>
-                                                                {% if user.is_staff %}
-                                                                    <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
-                                                                {% elif post.user == user %}
-                                                                    <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
-                                                                {% endif %}
+                                                    {% else %}
+                                                        {% if not post.spoiler %}
+                                                            <div class="d-flex flex-row">
+                                                                <div class="d-flex flex-column ml-2">
+                                                                    <span class="name">{{ post.user.username }}</span>
+                                                                    <p class="comment-text">{{ post.comment }}</p>
+                                                                    <div class="d-flex flex-row align-items-center status">
+                                                                        <small>Reply</small>
+                                                                        {% if user.is_staff %}
+                                                                            <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                        {% elif post.user == user %}
+                                                                            <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                        </div>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+
+                                                <form method="POST">{% csrf_token %}
+                                                    <div class="comment-input my-1">
+                                                        <label for="comment"><small>Write a comment:</small></label>
+                                                        <input id="comment" type="text" name="comment" class="form-control" placeholder="insert your comment">
+                                                        <button type="submit" class="btn btn-outline-success right my-1">Send</button>
                                                     </div>
-                                                {% endif %}
-                                            {% endfor %}
-                                            <form>
-                                                <div class="comment-input my-1">
-                                                    <label for="comment"><small>Write a comment:</small></label>
-                                                    <input type="text" name="comment" class="form-control" placeholder="insert your comment">
-                                                    <button type="submit" class="btn btn-outline-success right my-1">Send</button>
-                                                </div>
-                                                <label for="spoiler" style="color: RED">Spoiler
-                                                    <input type="checkbox" name="spoiler"></label>
-                                            </form>
+                                                    <label for="spoiler" style="color: RED">Spoiler
+                                                        <input type="checkbox" name="spoiler"></label>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -276,7 +287,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            {% endif %}
             <!-- end Film post -->
             {% for r in review %}
                 {% if r.reviewed_film_id == object.pk %}
@@ -314,6 +325,10 @@
                                                 <a href="{% url 'movie:update-review' r.pk %}" class="btn btn-outline-warning">Update-Review</a>
                                                 <a href="{% url 'movie:delete-review' r.pk %}" class="btn btn-outline-danger">Delete-Review</a>
                                             </div>
+                                        {% elif user.is_staff %}
+                                            <div class="my-2 mx-auto">
+                                                <a href="{% url 'movie:delete-review' r.pk %}" class="btn btn-outline-danger">Delete-Review</a>
+                                            </div>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -326,29 +341,19 @@
     </div>
 
     <script>
-        $(function () {
-            $('#lab').tooltip()
-        })
-
         function myFunction() {
-            var x = document.getElementById("myDIV");
+            let x = document.getElementById("myDIV");
             if (x.style.display === "none") {
                 x.style.display = "block";
             } else {
                 x.style.display = "none";
             }
         }
-    </script>
 
-    <script>
-        function showspoiler() {
-            var x = document.getElementById("divspo");
-            if (x.style.display === "none") {
-                x.style.display = "block";
-            } else {
-                x.style.display = "none";
-            }
+        function spoiler() {
+            document.getElementById("contact-form").submit();
         }
+
     </script>
 
 {% endblock content %}

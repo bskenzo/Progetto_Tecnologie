@@ -27,7 +27,7 @@
                             <label for="genre" class="form-label">Genre</label>
                             <select name="genre" required value="{{ prod.genre }}" class="form-control" id="genre">
                                 {% for x, genre in choices %}
-                                    <option>{{ genre }}</option>
+                                    <option>{{ x }}</option>
                                 {% endfor %}
                             </select>
                         </div>

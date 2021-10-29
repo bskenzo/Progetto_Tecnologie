@@ -27,23 +27,23 @@ class FilmCreateView(LoginRequiredMixin, CreateView):
     form_class = FilmForm
     template_name = 'movie/create.html'
 
-    def dispatch(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
-        if request.method == 'POST':
-            form = FilmForm(request.POST, request.FILES)
+        form = FilmForm(request.POST, request.FILES)
 
-            if form.is_valid():
-                form.save()
-                return redirect('home')
+        if form.is_valid():
+            form.save()
+            return redirect('home')
         else:
             form = FilmForm()
 
         return render(request, 'movie/create.html', {'form': form})
 
 
-class FilmDetailView(DetailView):
+class FilmDetailView(DetailView, UpdateView):
     model = Film
     template_name = 'movie/detail.html'
+    fields = '__all__'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -67,18 +67,34 @@ class FilmDetailView(DetailView):
             playlist = playlist.split('-')
             add_to_playlist(request, operation='add', pk=kwargs['pk'], playlist_id=playlist[0])
         except:
-            try:
-                name = request.GET
-                name = name['name']
-                pl = Playlist()
-                pl.name = name
-                pl.user_id = request.user.pk
-                pl.save()
-                add_to_playlist(request, operation='add', pk=kwargs['pk'], playlist_id=pl.pk)
-            except:
-                pass
+            pass
+
+        return super(FilmDetailView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+
         try:
-            text = request.GET
+            _ = request.POST['checkbox']
+            request.user.spoiler = True
+            request.user.save()
+        except:
+            request.user.spoiler = False
+            request.user.save()
+
+        try:
+            name = request.POST
+            name = name['name']
+            pl = Playlist()
+            pl.name = name
+            pl.user_id = request.user.pk
+            pl.save()
+            add_to_playlist(request, operation='add', pk=kwargs['pk'], playlist_id=pl.pk)
+        except:
+            pass
+
+
+        try:
+            text = request.POST
             com = text['comment']
             comment = Post()
             try:
@@ -96,7 +112,7 @@ class FilmDetailView(DetailView):
         except:
             pass
 
-        return super(FilmDetailView, self).get(request, *args, **kwargs)
+        return super(FilmDetailView, self).post(request, *args, **kwargs)
 
 
 class FilmUpdateView(LoginRequiredMixin, UpdateView):
@@ -186,34 +202,115 @@ class MovieListView(ListView):
     model = Film
     template_name = 'movie/movielist.html'
     context_object_name = 'films'
+    success_url = reverse_lazy('movie:list')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['choices'] = CATEGORY_CHOICES
+
+        try:
+            genres = self.request.GET['genre']
+            genres = genres.split(' ')
+
+            context['films'] = []
+            for genre in genres:
+                query_set = Film.objects.filter(genre__contains=genre)
+                for film in query_set.all():
+                    context['films'] += [film]
+
+            try:
+                _ = self.request.GET['price_dec']
+                context['films'] = context['films'].order_by('price')
+            except:
+                pass
+
+            try:
+                _ = self.request.GET['price_cre']
+                context['films'] = context['films'].order_by('-price')
+            except:
+                pass
+
+            try:
+                _ = self.request.GET['rating']
+                context['films'] = context['films'].annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
+            except:
+                pass
+        except:
+            pass
+
+        try:
+            _ = self.request.GET['price_dec']
+            context['films'] = Film.objects.all().order_by('price')
+        except:
+            pass
+
+        try:
+            _ = self.request.GET['price_cre']
+            context['films'] = Film.objects.all().order_by('-price')
+        except:
+            pass
+
+        try:
+            _ = self.request.GET['rating']
+            context['films'] = Film.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
+        except:
+            pass
+
         return context
 
+    def post(self, request, *args, **kwargs):
 
-# class TopListView(ListView):
-#     model = Review
-#     template_name = "movie/toplist.html"
-#     context_object_name = "films"
-#
-#     def get_queryset(self):
-#         return Film.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
-        # return Film.objects.all().order_by('price') Ordina in base al prezzo
+        genre = ''
+        for x, _ in CATEGORY_CHOICES:
+            try:
+                _ = (request.POST[x])
+                if genre == '':
+                    genre = x
+                else:
+                    genre = genre + ' ' + x
+            except:
+                pass
+        if genre != '':
+            self.success_url = reverse('movie:list') + f'?genre={genre}'
 
+        if self.success_url != reverse('movie:list'):
+            try:
+                _ = request.POST['filter_price_dec']
+                self.success_url += '&price_dec=on'
+            except:
+                pass
 
-class GenreListView(ListView):
-    model = Film
-    template_name = "movie/genre.html"
-    context_object_name = "films"
+            try:
+                _ = request.POST['filter_price_cre']
+                self.success_url += '&price_cre=on'
+            except:
+                pass
 
-    def get_queryset(self):
-        genre = Film.objects.filter(genre__contains=self.kwargs["genre"])
-        if genre:
-            return Film.objects.filter(genre__contains=self.kwargs["genre"])
+            try:
+                _ = request.POST['filter_rating']
+                self.success_url += '&rating=on'
+            except:
+                pass
         else:
-            raise Http404
+            try:
+                _ = request.POST['filter_price_dec']
+                self.success_url = reverse('movie:list') + '?price_dec=on'
+            except:
+                pass
+
+            try:
+                _ = request.POST['filter_price_cre']
+                self.success_url = reverse('movie:list') + '?price_cre=on'
+            except:
+                pass
+
+            try:
+                _ = request.POST['filter_rating']
+                self.success_url = reverse('movie:list') + '?rating=on'
+            except:
+                pass
+
+        return redirect(self.success_url)
 
 
 class MyListView(LoginRequiredMixin, ListView):
@@ -244,7 +341,6 @@ class WatchListView(LoginRequiredMixin, ListView):
     context_object_name = 'films'
 
     def get(self, request, *args, **kwargs):
-
         if request.user.is_subscribe == 'not_active':
             return redirect('movie:my-list')
 
@@ -350,7 +446,8 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
 
         if user.is_subscribe == 'not_active':
             messages.info(request, 'You must be subscribe')
-            return redirect('account:pricing')
+            next_page = f'?next=/movie/{kwargs["pk"]}/create-review/'
+            return redirect(reverse('account:pricing') + next_page)
 
         form = ReviewForm(request.POST or None, request.FILES or None)
         if form.is_valid():

@@ -1,17 +1,20 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
 from django.shortcuts import redirect
 from django.contrib import messages
 
 # Create your views here.
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, CreateView
 
 from movie.models import Film
+from playlist.forms import PlaylistForm
 from playlist.models import Playlist
 
 
-class PlaylistView(LoginRequiredMixin, TemplateView):
+class PlaylistView(LoginRequiredMixin, TemplateView, CreateView):
     model = Playlist
     template_name = 'playlist/playlist.html'
+    form_class = PlaylistForm
 
     def get_context_data(self, **kwargs):
         context = {}
@@ -20,23 +23,24 @@ class PlaylistView(LoginRequiredMixin, TemplateView):
 
         return context
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
-            name = request.GET['name']
+            print(request)
+            name = request.POST['name']
             pl = Playlist()
             pl.name = name
             pl.user_id = request.user.pk
             pl.save()
         except:
             try:
-                playlist = request.GET
+                playlist = request.POST
                 playlist = playlist['playlist']
                 playlist = playlist.split('-')
                 Playlist.objects.get(id=playlist[0]).delete()
             except:
                 pass
 
-        return super(PlaylistView, self).get(request, *args, **kwargs)
+        return redirect('playlist:playlist')
 
 
 def add_to_playlist(request, operation, pk, playlist_id):
@@ -53,4 +57,4 @@ def add_to_playlist(request, operation, pk, playlist_id):
             return redirect('playlist:playlist')
     else:
         messages.error(request, 'Selected Playlist does not exist')
-        return redirect('movie:film-detail', {'pk': pk})
+        return redirect('home')

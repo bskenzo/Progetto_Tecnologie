@@ -41,7 +41,7 @@
                 </form>
 
                 <div class="text-center pt-3">
-                    <form action="{% url 'account:checkout' %}" method="POST">
+                    <form action="{% url 'account:checkout' %}?next={{ next }}" method="POST">
                         {% csrf_token %}
                         <script
                                 src="https://checkout.stripe.com/checkout.js" class="stripe-button"

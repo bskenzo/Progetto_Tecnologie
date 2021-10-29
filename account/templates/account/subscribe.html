@@ -58,6 +58,8 @@
                         </ul>
                         {% if not user.is_authenticated %}
                             <a href="{% url 'account:register' %}?next={% url 'account:checkout'%}?price=Monthly"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        {% elif next %}
+                            <a href="{% url 'account:checkout' %}?price=Monthly&next={{ next }}"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
                         {% else %}
                             <a href="{% url 'account:checkout' %}?price=Monthly"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
                         {% endif %}
@@ -78,6 +80,8 @@
                         {% endif %}
                         {% if not user.is_authenticated %}
                             <a href="{% url 'account:register' %}?next={% url 'account:checkout'%}?price=Annual"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        {% elif next %}
+                            <a href="{% url 'account:checkout' %}?price=Annual&next={{ next }}"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
                         {% else %}
                             <a href="{% url 'account:checkout' %}?price=Annual"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
                         {% endif %}

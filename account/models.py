@@ -45,6 +45,7 @@ class Account(AbstractBaseUser):
     stripe_subscription_id = models.CharField(max_length=255)
     is_subscribe = models.CharField(max_length=255, default="not_active")
     expire_date = models.DateField(verbose_name='expire date', default='1970-01-01')
+    spoiler = models.BooleanField(default=False)
     # possiamo aggiungere altri field come il nome o il compleanno
 
     USERNAME_FIELD = 'email'
