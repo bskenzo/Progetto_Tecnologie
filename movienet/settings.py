@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'account',
     'movie',
     'playlist',
-    'post'
+    'post',
 
 
     # django apps

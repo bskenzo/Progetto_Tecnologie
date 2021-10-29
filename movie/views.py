@@ -17,6 +17,7 @@ from movie.mixins import AuthorRequiredMixin
 from movie.models import Film, CATEGORY_CHOICES, Review, MyList
 from playlist.models import Playlist
 from playlist.views import add_to_playlist
+from post.models import Post
 
 stripe.api_key = "sk_test_51JjpSBH1UjLFf6ccnvnflqfD1NkLyfRXOC0OxKjvwi4sYv2I3bpSz5Deiu7dgP0296tb8dy5OuwT7sXjJjZBBjWx00c3Hiu3VB"
 
@@ -47,6 +48,7 @@ class FilmDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['review'] = Review.objects.all()
+        context['posts'] = Post.objects.all()
         context['playlist'] = Playlist.objects.filter(user_id=self.request.user.pk)
         context['rating'] = Review.objects.filter(reviewed_film_id=self.kwargs['pk']).aggregate(Avg('rating'))
         try:
@@ -75,6 +77,24 @@ class FilmDetailView(DetailView):
                 add_to_playlist(request, operation='add', pk=kwargs['pk'], playlist_id=pl.pk)
             except:
                 pass
+        try:
+            text = request.GET
+            com = text['comment']
+            comment = Post()
+            try:
+                spoiler = text['spoiler']
+                if spoiler == 'on':
+                    comment.spoiler = True
+                else:
+                    comment.spoiler = False
+            except:
+                pass
+            comment.comment = com
+            comment.user_id = request.user.pk
+            comment.save()
+            comment.film.add(kwargs['pk'])
+        except:
+            pass
 
         return super(FilmDetailView, self).get(request, *args, **kwargs)
 
@@ -146,11 +166,13 @@ class FilmStreamView(LoginRequiredMixin, DetailView):
         context['film'] = film
 
         if request.user.is_subscribe == 'active':
+            film.views += 1
             return super(FilmStreamView, self).get(request, *args, context)
 
         try:
             my_list = MyList.objects.get(user_id=request.user.pk).film.all()
             if film in my_list:
+                film.views += 1
                 return super(FilmStreamView, self).get(request, *args, context)
             else:
                 messages.error(request, "You didn't purchase this film")
@@ -171,13 +193,13 @@ class MovieListView(ListView):
         return context
 
 
-class TopListView(ListView):
-    model = Review
-    template_name = "movie/toplist.html"
-    context_object_name = "films"
-
-    def get_queryset(self):
-        return Film.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
+# class TopListView(ListView):
+#     model = Review
+#     template_name = "movie/toplist.html"
+#     context_object_name = "films"
+#
+#     def get_queryset(self):
+#         return Film.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
         # return Film.objects.all().order_by('price') Ordina in base al prezzo
 
 

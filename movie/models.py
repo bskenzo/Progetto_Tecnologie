@@ -25,7 +25,7 @@ class Film(models.Model):
     date_posted = models.DateTimeField(auto_now_add=True, verbose_name="date published")
     price = models.CharField(max_length=250, default='7.99')
     video = models.FileField(upload_to="video/%y")
-    views = models.IntegerField(default=0)
+    views = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
     def __str__(self):
         return self.title

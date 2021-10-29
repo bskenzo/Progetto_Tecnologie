@@ -7,6 +7,95 @@
 
 {% block content %}
 
+    <style>
+        .card {
+            border: none
+        }
+
+        .ellipsis {
+            color: #a09c9c
+        }
+
+        hr {
+            color: #a09c9c;
+            margin-top: 4px;
+            margin-bottom: 8px
+        }
+
+        .muted-color {
+            color: #a09c9c;
+            font-size: 13px
+        }
+
+        .ellipsis i {
+            margin-top: 3px;
+            cursor: pointer
+        }
+
+        .icons i {
+            font-size: 25px
+        }
+
+        .icons .fa-heart {
+            color: red
+        }
+
+        .icons .fa-smile-o {
+            color: yellow;
+            font-size: 29px
+        }
+
+        .rounded-image {
+            border-radius: 50% !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50px;
+            width: 50px
+        }
+
+        .name {
+            font-weight: 600
+        }
+
+        .comment-text {
+            font-size: 12px
+        }
+
+        .status small {
+            margin-right: 10px;
+            color: blue
+        }
+
+        .form-control {
+            border-radius: 26px
+        }
+
+        .comment-input {
+            position: relative
+        }
+
+        .fonts {
+            position: absolute;
+            right: 13px;
+            top: 8px;
+            color: #a09c9c
+        }
+
+        .form-control:focus {
+            color: #495057;
+            background-color: #fff;
+            border-color: #8bbafe;
+            outline: 0;
+            box-shadow: none
+        }
+    </style>
+
+
+
+
+
+
     <div class="container">
 
         <div class="row">
@@ -128,6 +217,66 @@
                 </div>
             </div>
 
+            <div class="container">
+                <a class="align-items-center" type="button" href="#myDIV" onclick="myFunction()">Show Comments</a>
+                <div id="myDIV" style="display: none">
+                    <div class="mt-5 mb-5">
+                        <div class="row d-flex align-items-center justify-content-center">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="p-2">
+                                        <div class="comments">
+                                            {% for post in posts %}
+                                                {% if post.spoiler %}
+                                                    <a class="align-items-center" type="button" href="#divspo" onclick="showspoiler()">Show spoiler</a>
+                                                    <div class="d-flex flex-row" id="divspo" style="display: none">
+                                                        <div class="d-flex flex-column ml-2">
+                                                            <span class="name">{{ post.user.username }}</span>
+                                                            <p class="comment-text">{{ post.comment }}</p>
+                                                            <div class="d-flex flex-row align-items-center status">
+                                                                <small>Reply</small>
+                                                                {% if user.is_staff %}
+                                                                    <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                {% elif post.user == user %}
+                                                                    <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="d-flex flex-row">
+                                                        <div class="d-flex flex-column ml-2">
+                                                            <span class="name">{{ post.user.username }}</span>
+                                                            <p class="comment-text">{{ post.comment }}</p>
+                                                            <div class="d-flex flex-row align-items-center status">
+                                                                <small>Reply</small>
+                                                                {% if user.is_staff %}
+                                                                    <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                {% elif post.user == user %}
+                                                                    <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                            <form>
+                                                <div class="comment-input my-1">
+                                                    <label for="comment"><small>Write a comment:</small></label>
+                                                    <input type="text" name="comment" class="form-control" placeholder="insert your comment">
+                                                    <button type="submit" class="btn btn-outline-success right my-1">Send</button>
+                                                </div>
+                                                <label for="spoiler" style="color: RED">Spoiler
+                                                    <input type="checkbox" name="spoiler"></label>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- end Film post -->
             {% for r in review %}
                 {% if r.reviewed_film_id == object.pk %}
@@ -180,6 +329,26 @@
         $(function () {
             $('#lab').tooltip()
         })
+
+        function myFunction() {
+            var x = document.getElementById("myDIV");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+    </script>
+
+    <script>
+        function showspoiler() {
+            var x = document.getElementById("divspo");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
     </script>
 
 {% endblock content %}
