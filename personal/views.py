@@ -2,8 +2,9 @@ from datetime import datetime
 
 import stripe
 from django.views.generic import TemplateView
-
+from django.db.models import Count
 from account.models import Account
+from movie.models import Film, MyList
 
 
 class HomeView(TemplateView):
@@ -37,11 +38,38 @@ class HomeView(TemplateView):
 
         return super().dispatch(request, session)
 
-    # Serve per passare i contenuti
     def get_context_data(self, **kwargs):
 
         context = {}
-
+        film = Film.objects.order_by('-views')
+        lis = []
+        if len(film) > 10:
+            for i in range(10):
+                lis.append(film[i])
+            context['films'] = lis
+        else:
+            context['films'] = film
+        if self.request.user.is_authenticated:
+            try:
+                context['list'] = MyList.objects.get(user_id=self.request.user.pk).film.all()
+            except:
+                pass
+            try:
+                film_genre = MyList.objects.get(user_id=self.request.user.pk).film.all().values('genre').annotate(count=Count('genre')).order_by('-count').first()
+                genre = film_genre['genre']
+                all_film = Film.objects.all().filter(genre=genre)
+                context['list'] = context['list'].filter(genre=genre)
+                context['list'] = set(all_film).difference(set(context['list']))
+                list_film = list(context['list'])
+                lis = []
+                if len(list_film) > 10:
+                    for i in range(10):
+                        lis.append(list_film[i])
+                    context['list'] = set(lis)
+                else:
+                    pass
+            except:
+                pass
         accounts = Account.objects.all()
         context['accounts'] = accounts
 

@@ -73,6 +73,7 @@ class FilmDetailView(DetailView, UpdateView):
 
     def post(self, request, *args, **kwargs):
 
+        print(request.POST)
         try:
             _ = request.POST['checkbox']
             request.user.spoiler = True
@@ -107,8 +108,8 @@ class FilmDetailView(DetailView, UpdateView):
                 pass
             comment.comment = com
             comment.user_id = request.user.pk
+            comment.film_id = self.kwargs['pk']
             comment.save()
-            comment.film.add(kwargs['pk'])
         except:
             pass
 
@@ -183,12 +184,22 @@ class FilmStreamView(LoginRequiredMixin, DetailView):
 
         if request.user.is_subscribe == 'active':
             film.views += 1
+            film.save()
+            try:
+                my_list = MyList.objects.get(user_id=request.user.pk)
+                my_list.film.add(film)
+            except:
+                model = MyList()
+                model.user_id = request.user.pk
+                model.save()
+                model.film.add(film)
             return super(FilmStreamView, self).get(request, *args, context)
 
         try:
             my_list = MyList.objects.get(user_id=request.user.pk).film.all()
             if film in my_list:
                 film.views += 1
+                film.save()
                 return super(FilmStreamView, self).get(request, *args, context)
             else:
                 messages.error(request, "You didn't purchase this film")
@@ -339,6 +350,15 @@ class WatchListView(LoginRequiredMixin, ListView):
     model = Account
     template_name = 'movie/watchlist.html'
     context_object_name = 'films'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        try:
+            account = Account.objects.get(email=self.request.user.email)
+            my_list = MyList.objects.get(user_id=account.pk).film.all()
+        except:
+            my_list = {}
+            pass
+        return super(WatchListView, self).get_context_data(object_list=my_list)
 
     def get(self, request, *args, **kwargs):
         if request.user.is_subscribe == 'not_active':

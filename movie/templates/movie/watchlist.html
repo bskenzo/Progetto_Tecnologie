@@ -14,10 +14,10 @@
                 {% for film in films %}
                     <div class="col-sm-3 my-2">
                         <div id="list" class="card m-auto lead">
-                            <img class="card-img-top" src="{{ film.poster.url }}" alt="" height="300px">
+                            <a href="{% url 'movie:film-detail' film.pk %}"><img class="card-img-top" src="{{ film.poster.url }}" alt="" height="300px"></a>
                             <div class="card-body">
-                                <a href="{% url 'movie:stream-film' film.pk%}" class="card-title h3">{{ film.title }}</a>
-                                <p class="card-text">{{ film }} € </p>
+                                <h3>{{ film.title }}</h3>
+                                <a href="{% url 'movie:stream-film' film.pk%}" class="btn btn-outline-primary">Watch me</a>
                             </div>
                             <div class="card-footer text-muted">
                                 Director: {{ film.director }}
@@ -29,6 +29,6 @@
             </div>
         </div>
     {% else %}
-        <h3 class="text-center">You haven't purchased any movies</h3>
+        <h3 class="text-center">You haven't watched any movies</h3>
     {% endif %}
 {% endblock %}

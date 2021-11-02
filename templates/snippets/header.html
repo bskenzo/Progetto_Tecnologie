@@ -13,7 +13,11 @@
             <img class="mb-2" src="{% static "img/Logofinale.png" %}" alt="" width="90" height="54">
         </a>
     </h5>
-
+    <div class="search-bar mt-sm-2 mr-2">
+        <form method="get">
+            <input type="text" class="form-control" name="q" id="id_q" placeholder="Search...">
+        </form>
+    </div>
     <nav class="d-flex flex-row">
         {% if user.is_authenticated %}
             <p>

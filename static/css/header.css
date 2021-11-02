@@ -42,3 +42,8 @@ a.p-2{
 #username{
     color: black;
 }
+
+.search-bar{
+    max-width: 500px;
+    width: 100%;
+}

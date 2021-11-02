@@ -45,15 +45,6 @@
             font-size: 29px
         }
 
-        .rounded-image {
-            border-radius: 50% !important;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 50px;
-            width: 50px
-        }
-
         .name {
             font-weight: 600
         }
@@ -231,30 +222,15 @@
                                         <div class="p-2">
                                             <div class="comments">
                                                 {% for post in posts %}
-                                                    {% if user.spoiler %}
-                                                        <div class="d-flex flex-row">
-                                                            <div class="d-flex flex-column ml-2">
-                                                                {% if post.spoiler %}
-                                                                    <span class="name">{{ post.user.username }} - <span style="color: red">SPOILER</span></span>
-                                                                {% else %}
-                                                                    <span class="name">{{ post.user.username }}</span>
-                                                                {% endif %}
-                                                                <p class="comment-text">{{ post.comment }}</p>
-                                                                <div class="d-flex flex-row align-items-center status">
-                                                                    <small>Reply</small>
-                                                                    {% if user.is_staff %}
-                                                                        <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
-                                                                    {% elif post.user == user %}
-                                                                        <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
-                                                                    {% endif %}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    {% else %}
-                                                        {% if not post.spoiler %}
+                                                    {% if post.film_id == object.pk %}
+                                                        {% if user.spoiler %}
                                                             <div class="d-flex flex-row">
                                                                 <div class="d-flex flex-column ml-2">
-                                                                    <span class="name">{{ post.user.username }}</span>
+                                                                    {% if post.spoiler %}
+                                                                        <span class="name">{{ post.user.username }} - <span style="color: red">SPOILER</span></span>
+                                                                    {% else %}
+                                                                        <span class="name">{{ post.user.username }}</span>
+                                                                    {% endif %}
                                                                     <p class="comment-text">{{ post.comment }}</p>
                                                                     <div class="d-flex flex-row align-items-center status">
                                                                         <small>Reply</small>
@@ -266,18 +242,40 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
+                                                        {% else %}
+                                                            {% if not post.spoiler %}
+                                                                <div class="d-flex flex-row">
+                                                                    <div class="d-flex flex-column ml-2">
+                                                                        <span class="name">{{ post.user.username }}</span>
+                                                                        <p class="comment-text">{{ post.comment }}</p>
+                                                                        <div class="d-flex flex-row align-items-center status">
+                                                                            <small>Reply</small>
+                                                                            {% if user.is_staff %}
+                                                                                <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                            {% elif post.user == user %}
+                                                                                <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            {% endif %}
                                                         {% endif %}
                                                     {% endif %}
                                                 {% endfor %}
 
-                                                <form method="POST">{% csrf_token %}
+                                                <form id="contact-form1" method="POST">{% csrf_token %}
+                                                    {% if user.spoiler %}
+                                                        <input type="checkbox" id="checkbox" name="checkbox" checked hidden>
+                                                    {% else %}
+                                                        <input type="checkbox" id="checkbox" name="checkbox" hidden>
+                                                    {% endif %}
                                                     <div class="comment-input my-1">
                                                         <label for="comment"><small>Write a comment:</small></label>
                                                         <input id="comment" type="text" name="comment" class="form-control" placeholder="insert your comment">
                                                         <button type="submit" class="btn btn-outline-success right my-1">Send</button>
                                                     </div>
                                                     <label for="spoiler" style="color: RED">Spoiler
-                                                        <input type="checkbox" name="spoiler"></label>
+                                                        <input type="checkbox" id="spoiler" name="spoiler"></label>
                                                 </form>
                                             </div>
                                         </div>
