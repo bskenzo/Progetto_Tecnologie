@@ -4,7 +4,7 @@ import stripe
 from django.views.generic import TemplateView
 from django.db.models import Count
 from account.models import Account
-from movie.models import Film, MyList
+from movie.models import Film, MyList, CATEGORY_CHOICES
 
 
 class HomeView(TemplateView):
@@ -43,34 +43,63 @@ class HomeView(TemplateView):
         context = {}
         film = Film.objects.order_by('-views')
         lis = []
-        if len(film) > 10:
-            for i in range(10):
+        if len(film) > 20:
+            for i in range(20):
                 lis.append(film[i])
             context['films'] = lis
         else:
             context['films'] = film
+
         if self.request.user.is_authenticated:
             try:
                 context['list'] = MyList.objects.get(user_id=self.request.user.pk).film.all()
             except:
                 pass
+
             try:
-                film_genre = MyList.objects.get(user_id=self.request.user.pk).film.all().values('genre').annotate(count=Count('genre')).order_by('-count').first()
-                genre = film_genre['genre']
-                all_film = Film.objects.all().filter(genre=genre)
-                context['list'] = context['list'].filter(genre=genre)
-                context['list'] = set(all_film).difference(set(context['list']))
-                list_film = list(context['list'])
-                lis = []
-                if len(list_film) > 10:
-                    for i in range(10):
-                        lis.append(list_film[i])
-                    context['list'] = set(lis)
+                film_genre = MyList.objects.get(user_id=self.request.user.pk).film.all().values('genre').annotate(count=Count('genre')).order_by('-count')
+                max = None
+                for f in film_genre:
+                    genre = f['genre']
+                    all_film = Film.objects.all().filter(genre=genre)
+                    temp = context['list'].filter(genre=genre)
+                    if len(all_film.difference(temp)) > 0:
+                        max = all_film.difference(temp)
+                        break
+
+                max = max.order_by('-views')
+                if len(max) > 20:
+                    for i in range(20):
+                        lis.append(max[i])
+                    context['list'] = lis
                 else:
-                    pass
+                    context['list'] = max
             except:
                 pass
-        accounts = Account.objects.all()
-        context['accounts'] = accounts
+
+        context['choices'] = CATEGORY_CHOICES
+        context['genres'] = []
+        temp = {}
+
+        for category in CATEGORY_CHOICES:
+            try:
+                film_category = Film.objects.all().filter(genre=category[0])
+                if film_category:
+                    counter = 0
+
+                    for i in film_category:
+                        counter += 1
+                        temp.update({str(counter): i})
+
+                    if len(film_category) > 20:
+                        list_film = []
+                        for i in range(1, 21):
+                            list_film.append(temp.get(str(i)))
+                        context['genres'].append([category[0], list_film])
+
+                    else:
+                        context['genres'].append([category[0], film_category])
+            except:
+                pass
 
         return context

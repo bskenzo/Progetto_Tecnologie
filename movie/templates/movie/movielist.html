@@ -2,9 +2,18 @@
 
 {% load static %}
 
+{% block searchbar %}
+    <div class="search-bar mx-auto">
+        <form method="POST">{% csrf_token %}
+            <input type="text" class="form-control" name="q" id="id_q" placeholder="Search..." autofocus>
+        </form>
+    </div>
+{% endblock %}
+
 {% block style %}
     <link rel="stylesheet" href="{% static 'css/detail.css' %}">
 {% endblock %}
+
 
 {% block content %}
     <div class="container-flex">
@@ -43,7 +52,9 @@
                 {% for film in films %}
                     <div class="col-sm-4 my-2">
                         <div id="list" class="card m-auto lead">
-                            <img class="card-img-top" src="{{ film.poster.url }}" alt="" height="300px">
+                            <a href="{% url 'movie:film-detail' film.pk %}">
+                                <img class="card-img-top" src="{{ film.poster.url }}" alt="" height="300px">
+                            </a>
                             <div class="card-body">
                                 <a href="{% url 'movie:film-detail' film.pk %}" class="card-title h3">{{ film.title }}</a>
                                 <p class="card-text">{{ film.price }} € </p>

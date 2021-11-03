@@ -12,39 +12,6 @@
             border: none
         }
 
-        .ellipsis {
-            color: #a09c9c
-        }
-
-        hr {
-            color: #a09c9c;
-            margin-top: 4px;
-            margin-bottom: 8px
-        }
-
-        .muted-color {
-            color: #a09c9c;
-            font-size: 13px
-        }
-
-        .ellipsis i {
-            margin-top: 3px;
-            cursor: pointer
-        }
-
-        .icons i {
-            font-size: 25px
-        }
-
-        .icons .fa-heart {
-            color: red
-        }
-
-        .icons .fa-smile-o {
-            color: yellow;
-            font-size: 29px
-        }
-
         .name {
             font-weight: 600
         }
@@ -66,19 +33,16 @@
             position: relative
         }
 
-        .fonts {
-            position: absolute;
-            right: 13px;
-            top: 8px;
-            color: #a09c9c
-        }
-
         .form-control:focus {
             color: #495057;
             background-color: #fff;
             border-color: #8bbafe;
             outline: 0;
             box-shadow: none
+        }
+
+        .pointer:hover {
+            cursor: pointer;
         }
     </style>
 
@@ -140,7 +104,7 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <form>
+                                            <form id="playlist" name="playlist" method="POST">{% csrf_token %}
                                                 <div class="form-group">
                                                     <label for="playlist" class="form-label">Playlist</label>
                                                     <select name="playlist" required class="form-control" id="playlist">
@@ -195,16 +159,16 @@
                     {% endif %}
                 </div>
 
-
-
                 <div class="card-footer text-muted">
                     Director: {{ object.director }}
                     <span class="right">{{ object.release_date }}</span>
                 </div>
             </div>
 
+
             {% if user.is_authenticated %}
                 <div class="container">
+
                     <form id="contact-form" method="POST">{% csrf_token %}
                         {% if user.spoiler %}
                             <input type="checkbox" id="checkbox" name="checkbox" onclick="spoiler()" checked>
@@ -213,49 +177,196 @@
                         {% endif %}
                         <label for="checkbox" class="text-danger">Do you want spoiler?</label><br>
                     </form>
-                    <a class="align-items-center" type="button" href="#myDIV" onclick="myFunction()">Show Comments</a>
+
+                    <a class="align-items-center" type="button" onclick="myFunction()">Show Comments</a>
                     <div id="myDIV" style="display: none">
-                        <div class="mt-5 mb-5">
+                        <div>
                             <div class="row d-flex align-items-center justify-content-center">
                                 <div class="col-md-6">
                                     <div class="card">
                                         <div class="p-2">
-                                            <div class="comments">
+                                            <div>
                                                 {% for post in posts %}
                                                     {% if post.film_id == object.pk %}
                                                         {% if user.spoiler %}
-                                                            <div class="d-flex flex-row">
-                                                                <div class="d-flex flex-column ml-2">
+                                                            <div class="mb-4">
+                                                                <div>
                                                                     {% if post.spoiler %}
                                                                         <span class="name">{{ post.user.username }} - <span style="color: red">SPOILER</span></span>
                                                                     {% else %}
                                                                         <span class="name">{{ post.user.username }}</span>
                                                                     {% endif %}
-                                                                    <p class="comment-text">{{ post.comment }}</p>
-                                                                    <div class="d-flex flex-row align-items-center status">
-                                                                        <small>Reply</small>
+
+                                                                    <div class="comment-text">{{ post.comment }}</div>
+
+                                                                    <div class="status">
+                                                                        <a class="pointer" onclick="myReply({{ post.pk }})"><small>Reply</small></a>
                                                                         {% if user.is_staff %}
-                                                                            <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                            <a id="remove" href="{% url 'post:remove' post.id film.pk %}"><small>Remove</small></a>
                                                                         {% elif post.user == user %}
-                                                                            <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                            <a id="remove" href="{% url 'post:remove' post.id film.pk %}"><small>Remove</small></a>
                                                                         {% endif %}
                                                                     </div>
+
+
+
+                                                                    {% for rep in reply %}
+                                                                        {% if rep.post_id == post.pk %}
+                                                                            <div class="ml-4 mb-1">
+
+                                                                                {% if rep.spoiler %}
+                                                                                    <span class="name">{{ rep.user.username }} - <span style="color: red">SPOILER</span></span>
+                                                                                {% else %}
+                                                                                    <span class="name">{{ rep.user.username }}</span>
+                                                                                {% endif %}
+
+                                                                                <div class="comment-text">{{ rep.comment }}</div>
+
+                                                                                <div class="status">
+                                                                                    <a class="pointer" onclick="Reply({{ rep.pk }})"><small>Reply</small></a>
+                                                                                    {% if user.is_staff %}
+                                                                                        <a id="remove" href="{% url 'post:remove_reply' rep.id film.pk %}"><small>Remove</small></a>
+                                                                                    {% elif rep.user == user %}
+                                                                                        <a id="remove" href="{% url 'post:remove_reply' rep.id film.pk %}"><small>Remove</small></a>
+                                                                                    {% endif %}
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div id="Reply{{ rep.pk }}" style="display: none">
+                                                                                <form id="contact-form2" method="POST">{% csrf_token %}
+                                                                                    {% if user.spoiler %}
+                                                                                        <input type="checkbox" id="checkbox" name="checkbox" checked hidden>
+                                                                                    {% else %}
+                                                                                        <input type="checkbox" id="checkbox" name="checkbox" hidden>
+                                                                                    {% endif %}
+
+                                                                                    <div class="comment-input my-1">
+                                                                                        <input id="reply{{ post.pk }}" type="text" name="reply-{{ post.pk }}" class="form-control" value="@{{ rep.user.username }}">
+                                                                                        <button type="submit" class="btn btn-outline-success right my-1">Send</button>
+                                                                                    </div>
+                                                                                    <label for="spoiler" class="ml-2" style="color: RED">Spoiler
+                                                                                        <input type="checkbox" id="spoiler_reply" name="spoiler"></label>
+                                                                                </form>
+                                                                            </div>
+
+                                                                        {% endif %}
+                                                                    {% endfor %}
+
+                                                                    <div id="myReply{{ post.pk }}" style="display: none">
+                                                                        <form id="contact-form2" method="POST">{% csrf_token %}
+                                                                            {% if user.spoiler %}
+                                                                                <input type="checkbox" id="checkbox" name="checkbox" checked hidden>
+                                                                            {% else %}
+                                                                                <input type="checkbox" id="checkbox" name="checkbox" hidden>
+                                                                            {% endif %}
+
+                                                                            <div class="comment-input my-1">
+                                                                                <input id="reply{{ post.pk }}" type="text" name="reply-{{ post.pk }}" class="form-control" placeholder="Reply">
+                                                                                <button type="submit" class="btn btn-outline-success right my-1">Send</button>
+                                                                            </div>
+                                                                            <label for="spoiler" class="ml-2" style="color: RED">Spoiler
+                                                                                <input type="checkbox" id="spoiler_reply" name="spoiler"></label>
+                                                                        </form>
+                                                                    </div>
+
                                                                 </div>
                                                             </div>
+
                                                         {% else %}
                                                             {% if not post.spoiler %}
-                                                                <div class="d-flex flex-row">
-                                                                    <div class="d-flex flex-column ml-2">
+                                                                <div class="mb-4">
+                                                                    <div class="ml-2">
                                                                         <span class="name">{{ post.user.username }}</span>
-                                                                        <p class="comment-text">{{ post.comment }}</p>
-                                                                        <div class="d-flex flex-row align-items-center status">
-                                                                            <small>Reply</small>
+
+                                                                        <div class="comment-text">{{ post.comment }}</div>
+
+                                                                        <div class="status">
+                                                                            <a class="pointer" onclick="myReply({{ post.pk }})"><small>Reply</small></a>
                                                                             {% if user.is_staff %}
-                                                                                <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                                <a id="remove" href="{% url 'post:remove' post.id film.pk%}"><small>Remove</small></a>
                                                                             {% elif post.user == user %}
-                                                                                <a id="remove" href="{% url 'post:remove' post.id %}"><small>Remove</small></a>
+                                                                                <a id="remove" href="{% url 'post:remove' post.id film.pk%}"><small>Remove</small></a>
                                                                             {% endif %}
                                                                         </div>
+
+                                                                        {% for rep in reply %}
+                                                                            {% if rep.post_id == post.pk %}
+                                                                                {% if user.spoiler %}
+                                                                                    <div class="ml-4 mb-1">
+
+                                                                                        {% if rep.spoiler %}
+                                                                                            <span class="name">{{ rep.user.username }} - <span style="color: red">SPOILER</span></span>
+                                                                                        {% else %}
+                                                                                            <span class="name">{{ rep.user.username }}</span>
+                                                                                        {% endif %}
+
+                                                                                        <div class="comment-text">{{ rep.comment }}</div>
+
+                                                                                        <div class="status">
+                                                                                            <a class="pointer" onclick="Reply({{ rep.pk }})"><small>Reply</small></a>
+                                                                                            {% if user.is_staff %}
+                                                                                                <a id="remove" href="{% url 'post:remove_reply' rep.id film.pk %}"><small>Remove</small></a>
+                                                                                            {% elif rep.user == user %}
+                                                                                                <a id="remove" href="{% url 'post:remove_reply' rep.id film.pk %}"><small>Remove</small></a>
+                                                                                            {% endif %}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                {% else %}
+                                                                                    {% if not rep.spoiler %}
+                                                                                        <div class="ml-4 mb-1">
+                                                                                            <span class="name">{{ rep.user.username }}</span>
+
+                                                                                            <div class="comment-text">{{ rep.comment }}</div>
+
+                                                                                            <div class="status">
+                                                                                                <a class="pointer" onclick="Reply({{ rep.pk }})"><small>Reply</small></a>
+                                                                                                {% if user.is_staff %}
+                                                                                                    <a id="remove" href="{% url 'post:remove_reply' rep.id film.pk %}"><small>Remove</small></a>
+                                                                                                {% elif rep.user == user %}
+                                                                                                    <a id="remove" href="{% url 'post:remove_reply' rep.id film.pk %}"><small>Remove</small></a>
+                                                                                                {% endif %}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    {% endif %}
+                                                                                {% endif %}
+
+                                                                                <div id="Reply{{ rep.pk }}" style="display: none">
+                                                                                    <form id="contact-form2" method="POST">{% csrf_token %}
+                                                                                        {% if user.spoiler %}
+                                                                                            <input type="checkbox" id="checkbox" name="checkbox" checked hidden>
+                                                                                        {% else %}
+                                                                                            <input type="checkbox" id="checkbox" name="checkbox" hidden>
+                                                                                        {% endif %}
+
+                                                                                        <div class="comment-input my-1">
+                                                                                            <input id="reply{{ post.pk }}" type="text" name="reply-{{ post.pk }}" class="form-control" value="@{{ rep.user.username }}">
+                                                                                            <button type="submit" class="btn btn-outline-success right my-1">Send</button>
+                                                                                        </div>
+                                                                                        <label for="spoiler" class="ml-2" style="color: RED">Spoiler
+                                                                                            <input type="checkbox" id="spoiler_reply" name="spoiler"></label>
+                                                                                    </form>
+                                                                                </div>
+
+                                                                            {% endif %}
+                                                                        {% endfor %}
+
+                                                                        <div id="myReply{{ post.pk }}" style="display: none">
+                                                                            <form id="contact-form2" method="POST">{% csrf_token %}
+                                                                                {% if user.spoiler %}
+                                                                                    <input type="checkbox" id="checkbox" name="checkbox" checked hidden>
+                                                                                {% else %}
+                                                                                    <input type="checkbox" id="checkbox" name="checkbox" hidden>
+                                                                                {% endif %}
+
+                                                                                <div class="comment-input my-1">
+                                                                                    <input id="reply{{ post.pk }}" type="text" name="reply-{{ post.pk }}" class="form-control" placeholder="Reply">
+                                                                                    <button type="submit" class="btn btn-outline-success right my-1">Send</button>
+                                                                                </div>
+                                                                                <label for="spoiler" class="ml-2" style="color: RED">Spoiler
+                                                                                    <input type="checkbox" id="spoiler_reply" name="spoiler"></label>
+                                                                            </form>
+                                                                        </div>
+
                                                                     </div>
                                                                 </div>
                                                             {% endif %}
@@ -269,13 +380,13 @@
                                                     {% else %}
                                                         <input type="checkbox" id="checkbox" name="checkbox" hidden>
                                                     {% endif %}
-                                                    <div class="comment-input my-1">
-                                                        <label for="comment"><small>Write a comment:</small></label>
-                                                        <input id="comment" type="text" name="comment" class="form-control" placeholder="insert your comment">
+                                                    <div id="comment_div" class="comment-input mt-3">
+                                                        <input id="comment" type="text" name="comment" class="form-control" placeholder="Insert your comment">
                                                         <button type="submit" class="btn btn-outline-success right my-1">Send</button>
+                                                        <label for="spoiler" class="mt-2" style="color: RED">Spoiler
+                                                            <input type="checkbox" id="spoiler" name="spoiler"></label>
                                                     </div>
-                                                    <label for="spoiler" style="color: RED">Spoiler
-                                                        <input type="checkbox" id="spoiler" name="spoiler"></label>
+
                                                 </form>
                                             </div>
                                         </div>
@@ -350,6 +461,30 @@
 
         function spoiler() {
             document.getElementById("contact-form").submit();
+        }
+
+        function myReply(pk) {
+
+            let x = document.getElementById("myReply" + pk);
+            if (x.style.display === "none") {
+                document.getElementById("comment_div").style.display = "none" ;
+                x.style.display = "block";
+            } else {
+                document.getElementById("comment_div").style.display = "block" ;
+                x.style.display = "none";
+            }
+        }
+
+        function Reply(pk) {
+
+            let x = document.getElementById("Reply" + pk);
+            if (x.style.display === "none") {
+                document.getElementById("comment_div").style.display = "none" ;
+                x.style.display = "block";
+            } else {
+                document.getElementById("comment_div").style.display = "block" ;
+                x.style.display = "none";
+            }
         }
 
     </script>

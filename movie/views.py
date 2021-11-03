@@ -1,9 +1,11 @@
 import os
+import re
+from operator import attrgetter
 
 import stripe
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Avg
+from django.db.models import Avg, QuerySet
 from django.http import Http404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
@@ -17,7 +19,7 @@ from movie.mixins import AuthorRequiredMixin
 from movie.models import Film, CATEGORY_CHOICES, Review, MyList
 from playlist.models import Playlist
 from playlist.views import add_to_playlist
-from post.models import Post
+from post.models import Post, Reply
 
 stripe.api_key = "sk_test_51JjpSBH1UjLFf6ccnvnflqfD1NkLyfRXOC0OxKjvwi4sYv2I3bpSz5Deiu7dgP0296tb8dy5OuwT7sXjJjZBBjWx00c3Hiu3VB"
 
@@ -49,6 +51,8 @@ class FilmDetailView(DetailView, UpdateView):
         context = super().get_context_data(**kwargs)
         context['review'] = Review.objects.all()
         context['posts'] = Post.objects.all()
+        context['reply'] = Reply.objects.all()
+        print(context['reply'])
         context['playlist'] = Playlist.objects.filter(user_id=self.request.user.pk)
         context['rating'] = Review.objects.filter(reviewed_film_id=self.kwargs['pk']).aggregate(Avg('rating'))
         try:
@@ -60,20 +64,16 @@ class FilmDetailView(DetailView, UpdateView):
             pass
         return context
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+
         try:
-            playlist = request.GET
+            playlist = request.POST
             playlist = playlist['playlist']
             playlist = playlist.split('-')
             add_to_playlist(request, operation='add', pk=kwargs['pk'], playlist_id=playlist[0])
         except:
             pass
 
-        return super(FilmDetailView, self).get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-
-        print(request.POST)
         try:
             _ = request.POST['checkbox']
             request.user.spoiler = True
@@ -93,27 +93,49 @@ class FilmDetailView(DetailView, UpdateView):
         except:
             pass
 
-
         try:
             text = request.POST
             com = text['comment']
-            comment = Post()
-            try:
-                spoiler = text['spoiler']
-                if spoiler == 'on':
-                    comment.spoiler = True
-                else:
-                    comment.spoiler = False
-            except:
-                pass
-            comment.comment = com
-            comment.user_id = request.user.pk
-            comment.film_id = self.kwargs['pk']
-            comment.save()
+            if com != '':
+                comment = Post()
+                try:
+                    spoiler = text['spoiler']
+                    if spoiler == 'on':
+                        comment.spoiler = True
+                except:
+                    pass
+                comment.comment = com
+                comment.user_id = request.user.pk
+                comment.film_id = self.kwargs['pk']
+                comment.save()
         except:
             pass
 
-        return super(FilmDetailView, self).post(request, *args, **kwargs)
+        try:
+            text = request.POST
+            r = re.compile("reply-.*")
+            reply_post = list(filter(r.match, request.POST))
+            com = text[reply_post[0]]
+            if com != '':
+                reply = Reply()
+                try:
+                    spoiler = text['spoiler']
+                    if spoiler == 'on':
+                        reply.spoiler = True
+                except:
+                    pass
+                reply.comment = com
+                reply.user_id = request.user.pk
+                reply.film_id = self.kwargs['pk']
+                reply_post = reply_post[0].split('-')
+                reply.post_id = reply_post[1]
+                reply.save()
+        except:
+            pass
+
+        request.POST = []
+
+        return redirect('movie:film-detail', pk=kwargs['pk'])
 
 
 class FilmUpdateView(LoginRequiredMixin, UpdateView):
@@ -220,14 +242,20 @@ class MovieListView(ListView):
         context['choices'] = CATEGORY_CHOICES
 
         try:
+            query = self.request.GET['q']
+            film = sorted(Film.objects.filter(title__icontains=query), key=attrgetter('release_date'), reverse=True)
+            context['films'] = film
+        except:
+            pass
+
+        try:
             genres = self.request.GET['genre']
             genres = genres.split(' ')
 
             context['films'] = []
             for genre in genres:
                 query_set = Film.objects.filter(genre__contains=genre)
-                for film in query_set.all():
-                    context['films'] += [film]
+                context['films'] |= query_set.all()
 
             try:
                 _ = self.request.GET['price_dec']
@@ -246,30 +274,35 @@ class MovieListView(ListView):
                 context['films'] = context['films'].annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
             except:
                 pass
-        except:
-            pass
 
-        try:
-            _ = self.request.GET['price_dec']
-            context['films'] = Film.objects.all().order_by('price')
         except:
-            pass
+            try:
+                _ = self.request.GET['price_dec']
+                context['films'] = Film.objects.all().order_by('price')
+            except:
+                pass
 
-        try:
-            _ = self.request.GET['price_cre']
-            context['films'] = Film.objects.all().order_by('-price')
-        except:
-            pass
+            try:
+                _ = self.request.GET['price_cre']
+                context['films'] = Film.objects.all().order_by('-price')
+            except:
+                pass
 
-        try:
-            _ = self.request.GET['rating']
-            context['films'] = Film.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
-        except:
-            pass
+            try:
+                _ = self.request.GET['rating']
+                context['films'] = Film.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
+            except:
+                pass
 
         return context
 
     def post(self, request, *args, **kwargs):
+
+        try:
+            query = request.POST['q']
+            self.success_url = reverse('movie:list') + f'?q={query}'
+        except:
+            pass
 
         genre = ''
         for x, _ in CATEGORY_CHOICES:

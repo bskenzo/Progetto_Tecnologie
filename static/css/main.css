@@ -32,3 +32,8 @@ body{
 .right{
     float: right;
 }
+
+.search-bar{
+    max-width: 50vw;
+    width: 100%;
+}

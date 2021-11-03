@@ -9,6 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">  {# Rende la pagina web responsive "si adatta al device" #}
 
     {% include 'snippets/header.html' %}
+
+    {% block searchbar %}{% endblock %}
+
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/register.css' %}">
 
