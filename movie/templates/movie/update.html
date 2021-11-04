@@ -69,7 +69,7 @@
                         <div class="pt-3">
                             <label for="video" class="form-label">Video</label>
                         </div>
-                        <input type="file" name="video" accept="video/*" id="video" />
+                        <input type="text" name="video" class="form-control" required value="{{ prod.video }}" id="video" />
 
                         <div class="my-3">
                             <a href="{% url 'movie:film-detail' prod.pk %}" class="btn btn-outline-primary m-auto">Return to detail</a>
