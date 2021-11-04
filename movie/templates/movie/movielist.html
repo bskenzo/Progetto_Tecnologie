@@ -12,6 +12,7 @@
 
 {% block style %}
     <link rel="stylesheet" href="{% static 'css/detail.css' %}">
+    <script src="{% static 'js/movielist.js' %}"></script>
 {% endblock %}
 
 
@@ -23,13 +24,13 @@
                 <h6>Order By:</h6>
                 <form method="post">{% csrf_token %}
                     <div style="padding-left: 1vw;">
-                        <input type="checkbox" name="filter_price_dec" id="filter_price_dec" onClick="ckChange(this)">
+                        <input type="checkbox" name="filter_price_dec" id="filter_price_dec" onclick="ckChange(this)">
                         <label for="filter_price_dec">Decreasing Price</label><br>
 
-                        <input type="checkbox" name="filter_price_cre" id="filter_price_cre" onClick="ckChange(this)">
+                        <input type="checkbox" name="filter_price_cre" id="filter_price_cre" onclick="ckChange(this)">
                         <label for="filter_price_cre">Rising Price</label><br>
 
-                        <input type="checkbox" name="filter_rating" id="filter_rating" onClick="ckChange(this)">
+                        <input type="checkbox" name="filter_rating" id="filter_rating" onclick="ckChange(this)">
                         <label for="filter_rating">Rating</label><br>
                     </div>
 
@@ -69,43 +70,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function ckChange(ckType){
-            let ckName = document.getElementById(ckType.id);
-            let filter_price_dec = 'filter_price_dec';
-            let filter_price_cre = 'filter_price_cre';
-
-            if (ckName.checked){
-                if (!ckName.id.localeCompare(filter_price_dec)) {
-                    document.getElementById('filter_price_cre').disabled = true;
-                    document.getElementById('filter_rating').disabled = true;
-                }
-                else if (!ckName.id.localeCompare(filter_price_cre)){
-                    document.getElementById('filter_price_dec').disabled = true;
-                    document.getElementById('filter_rating').disabled = true;
-                }
-                else {
-                    document.getElementById('filter_price_dec').disabled = true;
-                    document.getElementById('filter_price_cre').disabled = true;
-                }
-            }
-            else {
-                if (!ckName.id.localeCompare(filter_price_dec)) {
-                    document.getElementById('filter_price_cre').disabled = false;
-                    document.getElementById('filter_rating').disabled = false;
-                }
-                else if (!ckName.id.localeCompare(filter_price_cre)){
-                    document.getElementById('filter_price_dec').disabled = false;
-                    document.getElementById('filter_rating').disabled = false;
-                }
-                else {
-                    document.getElementById('filter_price_dec').disabled = false;
-                    document.getElementById('filter_price_cre').disabled = false;
-                }
-            }
-        }
-    </script>
 
 {% endblock %}
 

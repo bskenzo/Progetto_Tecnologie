@@ -25,8 +25,7 @@ class Film(models.Model):
     poster = models.ImageField(upload_to='images/')
     release_date = models.DateField()
     date_posted = models.DateTimeField(auto_now_add=True, verbose_name="date published")
-    price = models.CharField(max_length=250, default='7.99')
-    # video = models.FileField(upload_to="video/%y")
+    price = models.FloatField(default=7.99)
     video = models.URLField()
     views = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 

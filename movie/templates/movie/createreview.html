@@ -6,8 +6,8 @@
     <form class="form-signin" method = "post">{% csrf_token %}
         <h1 class="h3 mb-3 font-weight-normal">Create Review</h1>
         {{ form | crispy }}
-        <button type="submit" class="btn btn-outline-success m-auto">Create</button>
         <a href="{% url 'movie:film-detail' film_pk %}" class="btn btn-outline-primary m-auto">Cancel</a>
+        <button type="submit" class="btn btn-outline-success m-auto">Create</button>
     </form>
 
 {% endblock content %}

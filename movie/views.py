@@ -52,7 +52,6 @@ class FilmDetailView(DetailView, UpdateView):
         context['review'] = Review.objects.all()
         context['posts'] = Post.objects.all()
         context['reply'] = Reply.objects.all()
-        print(context['reply'])
         context['playlist'] = Playlist.objects.filter(user_id=self.request.user.pk)
         context['rating'] = Review.objects.filter(reviewed_film_id=self.kwargs['pk']).aggregate(Avg('rating'))
         try:
@@ -252,20 +251,25 @@ class MovieListView(ListView):
             genres = self.request.GET['genre']
             genres = genres.split(' ')
 
-            context['films'] = []
+            context['films'] = None
             for genre in genres:
                 query_set = Film.objects.filter(genre__contains=genre)
-                context['films'] |= query_set.all()
+
+                if context['films'] is not None:
+                    context['films'] = context['films'] | query_set.all()
+                else:
+                    context['films'] = query_set.all()
 
             try:
                 _ = self.request.GET['price_dec']
-                context['films'] = context['films'].order_by('price')
+                context['films'] = list(context['films'].order_by('-price'))
+
             except:
                 pass
 
             try:
                 _ = self.request.GET['price_cre']
-                context['films'] = context['films'].order_by('-price')
+                context['films'] = context['films'].order_by('price')
             except:
                 pass
 
@@ -278,13 +282,13 @@ class MovieListView(ListView):
         except:
             try:
                 _ = self.request.GET['price_dec']
-                context['films'] = Film.objects.all().order_by('price')
+                context['films'] = Film.objects.all().order_by('-price')
             except:
                 pass
 
             try:
                 _ = self.request.GET['price_cre']
-                context['films'] = Film.objects.all().order_by('-price')
+                context['films'] = Film.objects.all().order_by('price')
             except:
                 pass
 

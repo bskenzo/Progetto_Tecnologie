@@ -28,6 +28,7 @@
         <option value="$MODULE_DIR$/account/templates" />
         <option value="$MODULE_DIR$/templates" />
         <option value="$MODULE_DIR$/personal/templates" />
+        <option value="$MODULE_DIR$/movie/templates" />
       </list>
     </option>
   </component>

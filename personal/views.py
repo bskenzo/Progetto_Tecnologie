@@ -53,27 +53,28 @@ class HomeView(TemplateView):
         if self.request.user.is_authenticated:
             try:
                 context['list'] = MyList.objects.get(user_id=self.request.user.pk).film.all()
-            except:
-                pass
-
-            try:
                 film_genre = MyList.objects.get(user_id=self.request.user.pk).film.all().values('genre').annotate(count=Count('genre')).order_by('-count')
                 max = None
                 for f in film_genre:
                     genre = f['genre']
                     all_film = Film.objects.all().filter(genre=genre)
                     temp = context['list'].filter(genre=genre)
+                    print('sono temp', temp)
+                    print('sono difference', len(all_film.difference(temp)))
                     if len(all_film.difference(temp)) > 0:
                         max = all_film.difference(temp)
                         break
 
-                max = max.order_by('-views')
-                if len(max) > 20:
-                    for i in range(20):
-                        lis.append(max[i])
-                    context['list'] = lis
+                if max is not None:
+                    max = max.order_by('-views')
+                    if len(max) > 20:
+                        for i in range(20):
+                            lis.append(max[i])
+                        context['list'] = lis
+                    else:
+                        context['list'] = max
                 else:
-                    context['list'] = max
+                    context['list'] = []
             except:
                 pass
 

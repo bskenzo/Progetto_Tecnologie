@@ -4,6 +4,7 @@
 {% block style %}
     <link rel="stylesheet" href="{% static 'css/update.css' %}">
     <link rel="stylesheet" href="{% static 'css/detail.css' %}">
+    <script src="{% static 'js/update.js' %}"></script>
 
 {% endblock %}
 
@@ -71,8 +72,8 @@
                         <input type="file" name="video" accept="video/*" id="video" />
 
                         <div class="my-3">
-                            <button type="submit" class="btn btn-outline-warning m-auto">Update</button>
                             <a href="{% url 'movie:film-detail' prod.pk %}" class="btn btn-outline-primary m-auto">Return to detail</a>
+                            <button type="submit" class="btn btn-outline-warning m-auto">Update</button>
                         </div>
 
                     </form>
@@ -80,20 +81,5 @@
             </div>
         </div>
     </div>
-
-    <script type="text/javascript">
-        document.getElementById('id_image_group').onclick = function(event){
-            document.getElementById('id_image_file').click();
-        };
-
-        function readURL(input){
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                $('#id_image_display')
-                    .attr('src', e.target.result)
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    </script>
 
 {% endblock content %}
