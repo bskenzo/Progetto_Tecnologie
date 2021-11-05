@@ -232,6 +232,7 @@ class MovieListView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['films'] = context['object_list'].order_by('title')
         context['choices'] = CATEGORY_CHOICES
 
         try:
@@ -253,10 +254,11 @@ class MovieListView(ListView):
                     context['films'] = context['films'] | query_set.all()
                 else:
                     context['films'] = query_set.all()
+            context['films'] = context['films'].order_by('title')
 
             try:
                 _ = self.request.GET['price_dec']
-                context['films'] = list(context['films'].order_by('-price'))
+                context['films'] = context['films'].order_by('-price')
 
             except:
                 pass
