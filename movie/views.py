@@ -156,19 +156,13 @@ class FilmUpdateView(LoginRequiredMixin, UpdateView):
                 except:
                     pass
 
-                try:
-                    _ = request.FILES['video']
-                    os.remove(prod.video.path)
-                    prod.video = request.FILES['video']
-                except:
-                    pass
-
             prod.title = request.POST.get('title')
             prod.genre = request.POST.get('genre')
             prod.director = request.POST.get('director')
             prod.plot = request.POST.get('plot')
             prod.release_date = request.POST.get('release_date')
             prod.price = request.POST.get('price')
+            prod.video = request.POST.get('video')
             prod.save()
 
             messages.success(request, "Updated")

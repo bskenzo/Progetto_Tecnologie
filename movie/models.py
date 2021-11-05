@@ -13,12 +13,11 @@ CATEGORY_CHOICES = (
     ('horror', 'Horror'),
     ('noir', 'Noir'),
     ('sci-fi', 'Sci-Fi'),
-    ('western', 'Western'),
 )
 
 
 class Film(models.Model):
-    title = models.CharField(max_length=20)
+    title = models.CharField(max_length=100)
     genre = models.CharField(max_length=25, choices=CATEGORY_CHOICES)
     director = models.CharField(max_length=250)
     plot = models.TextField(max_length=250)

@@ -59,8 +59,6 @@ class HomeView(TemplateView):
                     genre = f['genre']
                     all_film = Film.objects.all().filter(genre=genre)
                     temp = context['list'].filter(genre=genre)
-                    print('sono temp', temp)
-                    print('sono difference', len(all_film.difference(temp)))
                     if len(all_film.difference(temp)) > 0:
                         max = all_film.difference(temp)
                         break
