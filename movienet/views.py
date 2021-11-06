@@ -10,7 +10,7 @@ from movie.models import Film, MyList, CATEGORY_CHOICES
 class HomeView(TemplateView):
 
     model = Account
-    template_name = 'personal/home.html'
+    template_name = 'movienet/home.html'
 
     def dispatch(self, request, *args, **kwargs):
         session = None

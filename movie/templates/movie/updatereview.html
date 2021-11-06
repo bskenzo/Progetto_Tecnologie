@@ -6,8 +6,8 @@
     <form class="form-signin" method = "post">{% csrf_token %}
         <h1 class="h3 mb-3 font-weight-normal">Update Review</h1>
         {{ form | crispy }}
-        <button type="submit" class="btn btn-outline-warning m-auto">Update</button>
         <a href="{% url 'movie:film-detail' review.reviewed_film_id %}" class="btn btn-outline-primary m-auto">Return to detail</a>
+        <button type="submit" class="btn btn-outline-warning m-auto">Update</button>
     </form>
 
 {% endblock content %}

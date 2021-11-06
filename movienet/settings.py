@@ -36,7 +36,6 @@ if DEBUG:
 INSTALLED_APPS = [
 
     # my apps
-    'personal',
     'account',
     'movie',
     'playlist',

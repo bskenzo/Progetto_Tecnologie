@@ -522,7 +522,6 @@ class ReviewUpdateView(LoginRequiredMixin, AuthorRequiredMixin, UpdateView):
     model = Review
     form_class = ReviewForm
     template_name = 'movie/updatereview.html'
-    success_url = reverse_lazy('movie:film-detail')
 
     def get_success_url(self):
         return reverse('movie:film-detail', kwargs={'pk': self.object.reviewed_film_id})
@@ -531,4 +530,6 @@ class ReviewUpdateView(LoginRequiredMixin, AuthorRequiredMixin, UpdateView):
 class ReviewDeleteView(LoginRequiredMixin, AuthorRequiredMixin, DeleteView):
     model = Review
     template_name = 'movie/deletereview.html'
-    success_url = reverse_lazy('movie:list')
+
+    def get_success_url(self):
+        return reverse('movie:film-detail', kwargs={'pk': self.object.reviewed_film_id})
