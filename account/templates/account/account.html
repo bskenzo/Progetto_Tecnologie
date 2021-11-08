@@ -10,6 +10,7 @@
     </form>
 
     <div class="d-flex flex-column">
+        <a class="m-auto pb-2" href="{%  url 'account:manage_img' user.pk %}">Change Profile Image</a>
         <a class="m-auto pb-2" href="{% url 'account:password_change' %}">Change password</a>
         <a class="m-auto pb-4" href="{%  url 'account:delete' user.pk %}">Delete Account</a>
     </div>

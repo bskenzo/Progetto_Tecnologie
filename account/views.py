@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import stripe
@@ -116,6 +117,33 @@ class UpdateUser(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return super(UpdateUser, self).handle_no_permission()
 
 
+class ImgView(LoginRequiredMixin, UpdateView):
+    model = Account
+    fields = ['img']
+    template_name = 'account/update_img.html'
+    success_url = reverse_lazy('account:account')
+
+    def post(self, request, *args, **kwargs):
+        user = Account.objects.get(email=request.user.email)
+        if request.FILES is not None:
+            try:
+                _ = request.FILES['image']
+                if user.img != 'images/user_img.png':
+                    os.remove(user.img.path)
+                user.img = request.FILES['image']
+            except:
+                pass
+
+            user.save()
+
+            messages.success(request, "Updated")
+            return redirect('account:account')
+
+    def get_context_data(self, **kwargs):
+        user = Account.objects.get(email=self.request.user.email)
+        return super(ImgView, self).get_context_data(extra_context=user)
+
+
 class PasswordChangeViewP(PasswordChangeView):
 
     def form_valid(self, form):
@@ -155,6 +183,8 @@ class DeleteAccountView(LoginRequiredMixin, DeleteView):
             self.success_url = reverse('account:manage_account')
         else:
             messages.success(request, "Account deleted")
+
+        user.img.delete()
         return super().delete(request)
 
 
