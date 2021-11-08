@@ -1,8 +1,12 @@
 {% load static %}
 
+<script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
-      integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
-      crossorigin="anonymous">
+      integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"
+        integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF"
+        crossorigin="anonymous"></script>
+
 <link rel="stylesheet" href="{% static 'css/header.css' %}">
 
 <!--HEADER-->
@@ -17,35 +21,44 @@
         {% if user.is_authenticated %}
             <p>
                 <a class="p-2" href="{% url 'home' %}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                         class="bi bi-house-door-fill" viewBox="0 0 16 16">
-                        <path d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0
-                        .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0
-                        0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5z"/>
-                    </svg>Home</a>
+                    <img src="https://img.icons8.com/small/18/000000/home-page.png"/>Home</a>
+                <a class="p-2" href="{% url 'movie:list' %}">
+                    <img src="https://img.icons8.com/metro/16/000000/search.png"/>Search</a>
+                <a class="p-2" href="{% url 'movie:list' %}">
+                    <img src="https://img.icons8.com/material-outlined/20/000000/cinema-.png"/>Catalog</a>
             </p>
 
             <div class="dropdown">
                 <a class="dropbtn" id="username">{{ user.username|capfirst }}</a>
                 <div class="dropdown-content my-4">
-                    <a class="dropdown-item" href="{% url 'pricing' %}">Subscribe</a>
-                    <a class="dropdown-item" href="{% url 'account' %}">Settings</a>
-                    <a class="dropdown-item" href="#">My list</a>
-                    <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                    <a class="dropdown-item" href="{% url 'account:pricing' %}">Subscribe</a>
+                    <a class="dropdown-item" href="{% url 'account:account' %}">Settings</a>
+                    {% if user.is_staff %}
+                        {% if user.is_admin %}
+                            <a class="dropdown-item" href="{% url 'account:manage_account' %}">Manage Account</a>
+                        {% endif %}
+                        <a class="dropdown-item" href="{% url 'movie:create-view' %}">Add film</a>
+                        <a class="dropdown-item" href="{% url 'movie:watch-list' %}">Watch List</a>
+                    {% elif user.is_subscribe == 'active' %}
+                        <a class="dropdown-item" href="{% url 'movie:watch-list' %}">Watch List</a>
+                    {% else %}
+                        <a class="dropdown-item" href="{% url 'movie:my-list' %}">Purchased Film</a>
+                    {% endif %}
+                    <a class="dropdown-item" href="{% url 'playlist:playlist' %}">My Playlist</a>
+                    <a class="dropdown-item" href="{% url 'account:logout' %}">Logout</a>
                 </div>
             </div>
 
         {% else %}
             <p>
                 <a class="p-2" href="{% url 'home' %}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                         class="bi bi-house-door-fill" viewBox="0 0 16 16">
-                        <path d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0
-                        .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0
-                        0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5z"/>
-                    </svg>Home</a>
-                <a class="p-2" href="{% url 'login' %}">Login</a>
-                <a class="btn btn-outline-primary" href="{% url 'pricing' %}">Register</a>
+                    <img src="https://img.icons8.com/small/18/000000/home-page.png"/>Home</a>
+                <a class="p-2" href="{% url 'movie:list' %}">
+                    <img src="https://img.icons8.com/metro/16/000000/search.png"/>Search</a>
+                <a class="p-2" href="{% url 'movie:list' %}">
+                    <img src="https://img.icons8.com/material-outlined/20/000000/cinema-.png"/>Catalog</a>
+                <a class="p-2" href="{% url 'account:login' %}">Login</a>
+                <a class="btn btn-outline-primary" href="{% url 'account:pricing' %}">Register</a>
             </p>
         {% endif %}
     </nav>

@@ -1,19 +1,19 @@
 from datetime import datetime
 
+import stripe
 from django.contrib import messages
+from django.contrib.auth import logout, update_session_auth_hash, login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.http import Http404
 from django.shortcuts import render, redirect
-from django.contrib.auth import logout, update_session_auth_hash, login, authenticate
+from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, TemplateView, UpdateView, DeleteView
 
 from account.forms import RegistrationForm, AccountAuthenticationForm, AccountUpdateForm
-from django.urls import reverse_lazy
 from account.models import Account
-import stripe
-
-stripe.api_key = "sk_test_51JjpSBH1UjLFf6ccnvnflqfD1NkLyfRXOC0OxKjvwi4sYv2I3bpSz5Deiu7dgP0296tb8dy5OuwT7sXjJjZBBjWx00c3Hiu3VB"
+from account.models import COUPONS as coupons
 
 
 class RegisterUser(CreateView):
@@ -23,12 +23,19 @@ class RegisterUser(CreateView):
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
+
+        try:
+            self.success_url = self.request.GET['next']
+        except:
+            pass
+
         to_return = super().form_valid(form)
         user = authenticate(
             email=form.cleaned_data["email"],
             password=form.cleaned_data["password1"],
         )
         login(self.request, user)
+
         return to_return
 
 
@@ -49,6 +56,15 @@ class LoginUser(LoginView):
 
     form_class = AccountAuthenticationForm
     template_name = 'account/login.html'
+    success_url = reverse_lazy('home')
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.success_url = request.GET['next']
+        except:
+            pass
+
+        return super(LoginUser, self).get(request, *args, **kwargs)
 
 
 class UpdateUser(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
@@ -56,7 +72,7 @@ class UpdateUser(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Account
     form_class = AccountUpdateForm
     template_name = 'account/account.html'
-    success_url = reverse_lazy('account')
+    success_url = reverse_lazy('account:account')
     success_message = "Updated successfully"
     permission_denied_message = "You must authenticate first!"
 
@@ -65,12 +81,23 @@ class UpdateUser(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         session = None
 
         if not request.user.is_authenticated:
-            return redirect('must_authenticate')
+            next_page = f'?next=/account/'
+            return redirect(reverse('account:must_authenticate') + next_page)
 
         if request.user.stripe_id != "id_test":
             session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions'])
-            if not session.subscriptions.data:
+            if hasattr(session, 'deleted'):
+                if session.deleted:
+                    request.user.stripe_id = "id_test"
+                    request.user.is_subscribe = "not_active"
+                    request.user.expire_date = "1970-01-01"
+                    request.user.stripe_subscription_id = ""
+                    request.user.save()
+            elif not session.subscriptions.data:
                 request.user.is_subscribe = "not_active"
+                request.user.expire_date = "1970-01-01"
+                request.user.stripe_subscription_id = ""
+                request.user.save()
             else:
                 request.user.is_subscribe = session.subscriptions.data[0].status
                 request.user.expire_date = datetime.fromtimestamp(session.subscriptions.data[0].cancel_at).strftime('%Y-%m-%d')
@@ -103,6 +130,14 @@ class MustAuthenticate(TemplateView):
 
     template_name = 'account/must_authenticate.html'
 
+    def get(self, request, *args, **kwargs):
+        try:
+            context = {'next': self.request.GET['next']}
+            kwargs.update(context)
+        except:
+            pass
+        return super(MustAuthenticate, self).get(request, *args, **kwargs)
+
 
 class DeleteAccountView(LoginRequiredMixin, DeleteView):
 
@@ -111,104 +146,82 @@ class DeleteAccountView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('home')
 
     def delete(self, request, *args, **kwargs):
-        if request.user.stripe_id != "id_test":
-            stripe.Customer.delete(request.user.stripe_id)
+        user = self.get_object()
+        if user.stripe_id != "id_test":
+            stripe.Customer.delete(user.stripe_id)
 
-        messages.success(request, "The user is deleted")
+        if request.user.is_admin:
+            messages.success(request, f'Account {user.email} is deleted')
+            self.success_url = reverse('account:manage_account')
+        else:
+            messages.success(request, "Account deleted")
         return super().delete(request)
 
-    # def dispatch(self, request, *args, **kwargs):
-    #     if request.method == 'GET':
-    #         return render(request, 'account/delete_account.html')
-    #
-    #     if request.method == 'POST':
-    #         if request.POST['delete'] == 'Yes':
-    #             u = request.user
-    #
-    #             if request.user.stripe_id != "id_test":
-    #                 stripe.Customer.delete(request.user.stripe_id)
-    #
-    #             logout(request)
-    #             u.delete()
-    #             messages.success(request, "The user is deleted")
-    #             return redirect('home')
-    #         else:
-    #             return redirect('account')
-    #
-    #     return render(request, 'account/account.html')
+
+class ManageAccount(TemplateView):
+    model = Account
+    template_name = 'account/manage_account.html'
+    success_url = reverse_lazy('account:manage_account')
+
+    def get_context_data(self, **kwargs):
+        account = Account.objects.all()
+        request = Account.objects.filter(email=self.request.user.email)
+        account = account.difference(request)
+        return super(ManageAccount, self).get_context_data(extra_context=account)
+
+
+def make_staff(request, pk):
+    account = Account.objects.get(pk=pk)
+    if request.user.is_admin:
+        account.is_staff = True
+        account.is_subscribe = 'active'
+        account.save()
+        messages.success(request, f'User {account.username} upgrade to staff')
+        return redirect('account:manage_account')
+    else:
+        raise Http404
+
+
+def downgrade(request, pk):
+    account = Account.objects.get(pk=pk)
+    if request.user.is_admin:
+        account.is_staff = False
+        account.is_subscribe = 'not_active'
+        account.save()
+        messages.success(request, f'User {account.username} removed by staff')
+        return redirect('account:manage_account')
+    else:
+        raise Http404
 
 
 class PricingView(TemplateView):
 
     template_name = 'account/subscribe.html'
 
+    def get(self, request, *args, **kwargs):
+        try:
+            context = {'next': self.request.GET['next']}
+            kwargs.update(context)
+        except:
+            pass
+        return super(PricingView, self).get(request, *args, **kwargs)
 
-class CheckoutView(TemplateView):
+
+class CheckoutView(LoginRequiredMixin, UpdateView):
 
     template_name = 'account/payments/checkout.html'
 
-    def dispatch(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
-        if not request.user.is_authenticated:
-            return redirect('must_authenticate')
-
-        coupons = {'christmas': 20, 'easter': 10, 'epiphany': 5}
-
-        if request.method == 'POST':
-
-            # se l'utente esiste su stripe
-            if request.user.stripe_id != "id_test":
-                session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions']) # recupero l'abbonamento
-                # se esiste e non ha un abbonamento attivo, gli creiamo un abbonamento
-                if not session.subscriptions.data:
-                    messages.add_message(
-                        self.request, messages.SUCCESS,
-                        'Payment successfully!'
-                    )
-                    if request.POST['price'] == 'Monthly':
-                        price = 'price_1JjpqoH1UjLFf6ccEDLeXR4F'
-
-                    else:
-                        price = 'price_1Jjps4H1UjLFf6ccT1s7xqtU'
-
-                    if request.POST['coupon'] in coupons:
-                        percentage = coupons[request.POST['coupon'].lower()]
-                        try:
-                            coupon = stripe.Coupon.create(duration='once',
-                                                          id=request.POST['coupon'].lower(),
-                                                          percent_off=percentage)
-                        except:
-                            pass
-                        subscription = stripe.Subscription.create(customer=request.user.stripe_id,
-                                                                  items=[{'price': price}],
-                                                                  coupon=request.POST['coupon'].lower(),
-                                                                  cancel_at_period_end=True)
-                    else:
-                        subscription = stripe.Subscription.create(customer=request.user.stripe_id,
-                                                                  items=[{'price': price}],
-                                                                  cancel_at_period_end=True)
-
-                    customer = request.user
-                    customer.is_subscribe = True
-                    customer.stripe_subscription_id = subscription.id
-                    customer.expire_date = datetime.fromtimestamp(session.subscriptions.data[0].cancel_at).strftime('%Y-%m-%d')
-                    customer.save()
-                # altrimenti se esiste e ha gia un abbonamento
-                else:
-                    messages.add_message(
-                        self.request, messages.SUCCESS,
-                        'User just have a subscribe!'
-                    )
-            # se non esiste su stripe
-            else:
+        # se l'utente esiste su stripe
+        if request.user.stripe_id != "id_test":
+            session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions']) # recupero l'abbonamento
+            # se esiste e non ha un abbonamento attivo, gli creiamo un abbonamento
+            if not session.subscriptions.data:
                 messages.add_message(
                     self.request, messages.SUCCESS,
                     'Payment successfully!'
                 )
-
-                stripe_customer = stripe.Customer.create(email=request.user.email,
-                                                         source=request.POST['stripeToken'])
-
                 if request.POST['price'] == 'Monthly':
                     price = 'price_1JjpqoH1UjLFf6ccEDLeXR4F'
 
@@ -218,54 +231,110 @@ class CheckoutView(TemplateView):
                 if request.POST['coupon'] in coupons:
                     percentage = coupons[request.POST['coupon'].lower()]
                     try:
-                        coupon = stripe.Coupon.create(duration='once',
-                                                      id=request.POST['coupon'].lower(),
-                                                      percent_off=percentage)
+                        stripe.Coupon.create(duration='once',
+                                             id=request.POST['coupon'].lower(),
+                                             percent_off=percentage)
                     except:
                         pass
-                    subscription = stripe.Subscription.create(customer=stripe_customer.id,
+                    subscription = stripe.Subscription.create(customer=request.user.stripe_id,
                                                               items=[{'price': price}],
                                                               coupon=request.POST['coupon'].lower(),
                                                               cancel_at_period_end=True)
                 else:
-                    subscription = stripe.Subscription.create(customer=stripe_customer.id,
+                    subscription = stripe.Subscription.create(customer=request.user.stripe_id,
                                                               items=[{'price': price}],
                                                               cancel_at_period_end=True)
 
+                session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions']) # recuperiamo la sessione aggiornata
                 customer = request.user
-                customer.stripe_id = stripe_customer.id
-                customer.is_subscribe = True
+                customer.is_subscribe = 'active'
                 customer.stripe_subscription_id = subscription.id
-                session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions'])
                 customer.expire_date = datetime.fromtimestamp(session.subscriptions.data[0].cancel_at).strftime('%Y-%m-%d')
                 customer.save()
-
-            return redirect('home')
-
+            # altrimenti se esiste e ha gia un abbonamento
+            else:
+                messages.add_message(
+                    self.request, messages.SUCCESS,
+                    'User just have a subscribe!'
+                )
+        # se non esiste su stripe
         else:
-            coupon_amount = 0
-            coupon = 'none'
-            price = 'Monthly'
-            amount = 8.99
-            original_amount = 8.99
-            final_amount = 8.99
-            if request.method == 'GET' and 'price' in request.GET:
-                if request.GET['price'] == 'Annual':
-                    price = 'Annual'
-                    amount = 89.99
-                    original_amount = 89.99
-                    final_amount = 89.99
+            messages.add_message(
+                self.request, messages.SUCCESS,
+                'Payment successfully!'
+            )
 
-            if request.method == 'GET' and 'coupon' in request.GET:
-                if request.GET['coupon'].lower() in coupons:
-                    coupon = request.GET['coupon'].lower()
-                    percentage = coupons[request.GET['coupon'].lower()]
-                    coupon_price = float((percentage/100)*amount)
-                    amount = amount - coupon_price
-                    coupon_amount = str(coupon_price)
-                    final_amount = str(round(amount, 2))
+            stripe_customer = stripe.Customer.create(email=request.user.email,
+                                                     source=request.POST['stripeToken'])
 
-            return render(request, 'account/payments/checkout.html', {'price': price, 'amount': amount*100,
-                                                                      'coupon': coupon, 'coupon_amount': coupon_amount,
-                                                                      'final_amount': final_amount,
-                                                                      'original_amount': original_amount})
+            if request.POST['price'] == 'Monthly':
+                price = 'price_1JjpqoH1UjLFf6ccEDLeXR4F'
+
+            else:
+                price = 'price_1Jjps4H1UjLFf6ccT1s7xqtU'
+
+            if request.POST['coupon'] in coupons:
+                percentage = coupons[request.POST['coupon'].lower()]
+                try:
+                    stripe.Coupon.create(duration='once',
+                                         id=request.POST['coupon'].lower(),
+                                         percent_off=percentage)
+                except:
+                    pass
+                subscription = stripe.Subscription.create(customer=stripe_customer.id,
+                                                          items=[{'price': price}],
+                                                          coupon=request.POST['coupon'].lower(),
+                                                          cancel_at_period_end=True)
+            else:
+                subscription = stripe.Subscription.create(customer=stripe_customer.id,
+                                                          items=[{'price': price}],
+                                                          cancel_at_period_end=True)
+
+            customer = request.user
+            customer.stripe_id = stripe_customer.id
+            customer.is_subscribe = 'active'
+            customer.stripe_subscription_id = subscription.id
+            session = stripe.Customer.retrieve(request.user.stripe_id, expand=['subscriptions'])
+            customer.expire_date = datetime.fromtimestamp(session.subscriptions.data[0].cancel_at).strftime('%Y-%m-%d')
+            customer.save()
+
+        try:
+            return redirect(request.GET['next'])
+        except:
+            pass
+
+        return redirect('home')
+
+    def get(self, request, *args, **kwargs):
+        coupon_amount = 0
+        coupon = 'none'
+        price = 'Monthly'
+        amount = 8.99
+        original_amount = 8.99
+        final_amount = 8.99
+        if request.method == 'GET' and 'price' in request.GET:
+            if request.GET['price'] == 'Annual':
+                price = 'Annual'
+                amount = 89.99
+                original_amount = 89.99
+                final_amount = 89.99
+
+        if request.method == 'GET' and 'coupon' in request.GET:
+            if request.GET['coupon'].lower() in coupons:
+                coupon = request.GET['coupon'].lower()
+                percentage = coupons[request.GET['coupon'].lower()]
+                coupon_price = float((percentage/100)*amount)
+                amount = amount - coupon_price
+                coupon_amount = str(coupon_price)
+                final_amount = str(round(amount, 2))
+
+        try:
+            next_page = request.GET['next']
+        except:
+            next_page = ''
+
+        return render(request, 'account/payments/checkout.html', {'price': price, 'amount': amount*100,
+                                                                  'coupon': coupon, 'coupon_amount': coupon_amount,
+                                                                  'final_amount': final_amount,
+                                                                  'original_amount': original_amount,
+                                                                  'next': next_page})

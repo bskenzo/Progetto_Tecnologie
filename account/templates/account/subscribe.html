@@ -9,61 +9,86 @@
     <link rel="stylesheet" href="{% static 'css/pricing.css' %}">
 
     <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-        <h1 class="display-4">Pricing</h1>
-        <p class="lead">Quickly build an effective pricing table for your potential customers with this Bootstrap example.
-            It’s built with default Bootstrap components and utilities with little customization.</p>
+        <h1 class="display-4">Subscribe</h1>
+        {% if user.is_subscribe != "active" %}
+            <p class="lead">Choose here your subscription</p>
+        {% elif user.is_staff %}
+            <h5 class="mb-3 text-center">You are a staff member</h5>
+        {% else %}
+            <p class="lead">You already have a subscription</p>
+        {% endif %}
+
     </div>
 
     <div class="container">
+        {% if user.is_subscribe == "active" %}
+            {% if not user.is_staff %}
+                <h5 class="mb-3 text-center">Your subscription expire: {{ user.expire_date }}</h5>
+            {% endif %}
+        {% endif %}
         <div class="card-deck mb-3 text-center">
-                {% if not user.is_authenticated %}
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header">
-                            <h4 class="my-0 font-weight-normal">Free</h4>
-                        </div>
-                        <div class="card-body">
-                            <h1 class="card-title pricing-card-title">$0 <small class="text-muted">/ mo</small></h1>
-                            <ul class="list-unstyled mt-3 mb-4">
-                                <li>10 users included</li>
-                                <li>2 GB of storage</li>
-                                <li>Email support</li>
-                                <li>Help center access</li>
-                            </ul>
-                            <a href="{% url 'register' %}" type="button"
-                               class="btn btn-lg btn-block btn-outline-primary" >Sign up for free</a>
-                        </div>
-                    </div>
-                {% endif %}
+            {% if not user.is_authenticated %}
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header">
-                        <h4 class="my-0 font-weight-normal">Pro</h4>
+                        <h4 class="my-0 font-weight-normal">Free</h4>
                     </div>
                     <div class="card-body">
-                        <h1 class="card-title pricing-card-title">$15 <small class="text-muted">/ mo</small></h1>
+                        <h1 class="card-title pricing-card-title">0€ <small class="text-muted"></small></h1>
                         <ul class="list-unstyled mt-3 mb-4">
-                            <li>20 users included</li>
-                            <li>10 GB of storage</li>
-                            <li>Priority email support</li>
-                            <li>Help center access</li>
+                            <li>You can buy film</li>
+                            <li>Create a playlist</li>
                         </ul>
-                        <a href="{% url 'checkout' %}?price=Monthly"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        <br>
+                        <a href="{% url 'account:register' %}" type="button"
+                           class="btn btn-lg btn-block btn-outline-primary" >Sign up for free</a>
+                    </div>
+                </div>
+            {% endif %}
+            {% if user.is_subscribe != "active" %}
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header">
+                        <h4 class="my-0 font-weight-normal">Monthly Subscription</h4>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="card-title pricing-card-title">7,99€ <small class="text-muted">/ monthly</small></h1>
+                        <ul class="list-unstyled mt-3 mb-4">
+                            <li>Illimitable access to catalog</li>
+                            <li>Review and evaluate film</li>
+                            <li>All privileges of Free account</li>
+                        </ul>
+                        {% if not user.is_authenticated %}
+                            <a href="{% url 'account:register' %}?next={% url 'account:checkout'%}?price=Monthly"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        {% elif next %}
+                            <a href="{% url 'account:checkout' %}?price=Monthly&next={{ next }}"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        {% else %}
+                            <a href="{% url 'account:checkout' %}?price=Monthly"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header">
-                        <h4 class="my-0 font-weight-normal">Enterprise</h4>
+                        <h4 class="my-0 font-weight-normal">Annual Subscription</h4>
                     </div>
                     <div class="card-body">
-                        <h1 class="card-title pricing-card-title">$29 <small class="text-muted">/ mo</small></h1>
+                        <h1 class="card-title pricing-card-title">79,99€ <small class="text-muted">/ annual</small></h1>
                         <ul class="list-unstyled mt-3 mb-4">
-                            <li>30 users included</li>
-                            <li>15 GB of storage</li>
-                            <li>Phone and email support</li>
-                            <li>Help center access</li>
+                            <li>All privileges of Monthly subscription</li>
+                            <li>Save 15% on the subscription</li>
                         </ul>
-                        <a href="{% url 'checkout' %}?price=Annual"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        {% if user.is_authenticated %}
+                            <br>
+                        {% endif %}
+                        {% if not user.is_authenticated %}
+                            <a href="{% url 'account:register' %}?next={% url 'account:checkout'%}?price=Annual"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        {% elif next %}
+                            <a href="{% url 'account:checkout' %}?price=Annual&next={{ next }}"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        {% else %}
+                            <a href="{% url 'account:checkout' %}?price=Annual"><button type="submit" class="btn btn-lg btn-block btn-primary">Pay</button></a>
+                        {% endif %}
                     </div>
                 </div>
+            {% endif %}
+
         </div>
     </div>
 

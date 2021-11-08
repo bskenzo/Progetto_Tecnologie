@@ -7,22 +7,40 @@
     <title>{% block title %} {% endblock %}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">  {# Rende la pagina web responsive "si adatta al device" #}
+
+    {% include 'snippets/header.html' %}
+
+    {% block searchbar %}{% endblock %}
+
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/register.css' %}">
-    {% include 'snippets/header.html' %}
+
+    {% block style %}{% endblock %}
 
 </head>
 
 <body>
-    <!--Body-->
-    <div class="main">
-        {% block content %}
+<!--Body-->
+<div class="main">
 
-        {% endblock %}
+    <div class="container">
+
+        {% if messages %}
+            <ul class="messages text-center" >
+                {% for message in messages %}
+                    <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </div>
-    <!--End Body-->
 
-    {% include 'snippets/footer.html' %}
+    {% block content %}
+
+    {% endblock %}
+</div>
+<!--End Body-->
+
+{% include 'snippets/footer.html' %}
 
 </body>
 

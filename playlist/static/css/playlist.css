@@ -1,0 +1,34 @@
+* {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 1px;
+}
+
+.gallery {
+    background: #EEE;
+}
+
+.gallery-cell {
+    width: 150px;
+    height: 300px;
+    margin-right: 10px;
+}
+
+.gallery-cell.is-selected {
+    background: #ED2;
+}
+
+/* cell number */
+.gallery-cell:before {
+    display: block;
+    text-align: center;
+    line-height: 200px;
+    font-size: 80px;
+    color: white;
+}
+
+#remove {
+    position: absolute;
+    bottom: 0;
+    margin-left: -27px;
+}

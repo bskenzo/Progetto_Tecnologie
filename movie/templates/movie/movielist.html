@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block searchbar %}
+    <div class="search-bar mx-auto">
+        <form method="POST">{% csrf_token %}
+            <input type="text" class="form-control" name="q" id="id_q" placeholder="Search..." autofocus>
+        </form>
+    </div>
+{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/detail.css' %}">
+    <script src="{% static 'js/movielist.js' %}"></script>
+{% endblock %}
+
+
+{% block content %}
+    <div class="container-flex">
+        <div class="filter_by">
+            <div style="padding-left: 1vw;">
+                <h3>FILTER BY</h3>
+                <h6>Order By:</h6>
+                <form method="post">{% csrf_token %}
+                    <div style="padding-left: 1vw;">
+                        <input type="checkbox" name="filter_price_dec" id="filter_price_dec" onclick="ckChange(this)">
+                        <label for="filter_price_dec">Decreasing Price</label><br>
+
+                        <input type="checkbox" name="filter_price_cre" id="filter_price_cre" onclick="ckChange(this)">
+                        <label for="filter_price_cre">Rising Price</label><br>
+
+                        <input type="checkbox" name="filter_rating" id="filter_rating" onclick="ckChange(this)">
+                        <label for="filter_rating">Rating</label><br>
+                    </div>
+
+                    <hr style="border: 1px solid #000000; margin-right: 1vw;">
+                    <h6>Genres:</h6>
+                    <div style="padding-left: 1vw;">
+                        {% for x, genre in choices|dictsort:0 %}
+                            <input type="checkbox" id="{{ genre }}" name="{{ x }}">
+                            <label for="{{ genre }}">{{ genre }}</label><br>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-info mb-2">Apply</button>
+                </form>
+            </div>
+
+        </div>
+        <div class="container">
+            <div class="row ">
+                {% for film in films %}
+                    <div class="col-sm-4 my-2">
+                        <div id="list" class="card m-auto lead">
+                            <a href="{% url 'movie:film-detail' film.pk %}">
+                                <img class="card-img-top" src="{{ film.poster.url }}" alt="" height="300px">
+                            </a>
+                            <div class="card-body">
+                                <b><a href="{% url 'movie:film-detail' film.pk %}" class="card-title">{{ film.title }}</a></b>
+                                <p class="card-text">{{ film.price }} € </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+

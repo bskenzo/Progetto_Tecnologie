@@ -1,0 +1,115 @@
+.card {
+    max-width: 700px;
+    max-height: 100%;
+}
+
+.container-flex{
+    display: flex;
+    margin-left: 2vw;
+    padding-left: 1vw;
+}
+
+.filter_by{
+    background-color: #CBCBCB;
+    width: 250px;
+    height: 100%
+}
+
+.container {
+    padding: 20px;
+}
+
+.sm-text {
+    font-size: 10px;
+    letter-spacing: 1px
+}
+
+.grey-text {
+    color: #BDBDBD
+}
+
+.green-text {
+    color: #4CAF50
+}
+
+.sm-text {
+    font-size: 10px;
+    letter-spacing: 1px
+}
+
+.gray-tab {
+    background-color: lightslategray;
+    color: #fff;
+    border-radius: 5px;
+}
+
+.green-tab {
+    background-color: #00C853;
+    color: #fff;
+    border-radius: 5px;
+}
+
+.grey-text {
+    color: #BDBDBD
+}
+
+.green-text {
+    color: #4CAF50
+}
+
+
+[id=toggle-heart] {
+    position: absolute;
+    left: -100vw;
+}
+[id=toggle-heart]:checked + label {
+    color: #e2264d;
+    will-change: font-size;
+    animation: heart 1s cubic-bezier(0.17, 0.89, 0.32, 1.49);
+}
+
+[for=toggle-heart] {
+    align-self: center;
+    color: #aab8c2;
+    font-size: 27px;
+    cursor: pointer;
+}
+
+@keyframes heart {
+    0%, 15% {
+        font-size: 0;
+    }
+}
+
+.name {
+    font-weight: 600
+}
+
+.comment-text {
+    font-size: 12px
+}
+
+.status small {
+    margin-right: 10px;
+    color: blue
+}
+
+.form-control {
+    border-radius: 26px
+}
+
+.comment-input {
+    position: relative
+}
+
+.form-control:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #8bbafe;
+    outline: 0;
+    box-shadow: none
+}
+
+.pointer:hover {
+    cursor: pointer;
+}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    {% if films|length > 0 %}
+        <div class="container-fluid">
+            <div class="row ">
+                {% for film in films %}
+                    <div class="col-sm-3 my-2">
+                        <div id="list" class="card m-auto lead">
+                            <a href="{% url 'movie:film-detail' film.pk %}"><img class="card-img-top" src="{{ film.poster.url }}" alt="" height="300px"></a>
+                            <div class="card-body">
+                                <h3>{{ film.title }}</h3>
+                                <a href="{% url 'movie:stream-film' film.pk%}" class="btn btn-outline-primary">Watch me</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <h3 class="text-center">You haven't watched any movies</h3>
+    {% endif %}
+{% endblock %}

@@ -30,7 +30,7 @@
                     </li>
                 </ul>
 
-                <form class="card p-2" action="{% url 'checkout' %}" method="GET">
+                <form class="card p-2" action="{% url 'account:checkout' %}" method="GET">
                     <div class="input-group">
                         <input type="text" class="form-control" placeholder="Promo code" name="coupon">
                         <input type="hidden" value="{{ price }}" name="price" />
@@ -41,8 +41,8 @@
                 </form>
 
                 <div class="text-center pt-3">
-                    <form action="{% url 'checkout' %}" method="POST">
-                        {% csrf_token %}
+                    <form action="{% url 'account:checkout' %}?next={{ next }}" method="POST">{% csrf_token %}
+                        <a href="{% url 'account:pricing' %}" class="btn btn-outline-primary">Cancel</a>
                         <script
                                 src="https://checkout.stripe.com/checkout.js" class="stripe-button"
                                 data-key="pk_test_51JjpSBH1UjLFf6ccLdFhC7Ylt8ck2sAGYbVfENTQPuOeS2ALM0DjGYwlkLA8kSHB75uyvBNMsZx1ci8y2YoCeaXL00iaQWUyBO"
@@ -61,9 +61,4 @@
         </div>
     </div>
 
-
-
 {% endblock %}
-
-</body>
-</html>

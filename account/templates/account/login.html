@@ -5,14 +5,6 @@
 
     <form class="form-signin" method="post">{% csrf_token %}
 
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
-                {% endfor %}
-            </ul>
-        {% endif %}
-
         <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
         {{ form | crispy }}
         <input class="btn btn-lg btn-primary btn-block" type="submit" value="Login">

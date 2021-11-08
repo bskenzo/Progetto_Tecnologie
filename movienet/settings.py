@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -36,10 +36,10 @@ if DEBUG:
 INSTALLED_APPS = [
 
     # my apps
-    'personal',
     'account',
-    'movie.apps.MovieConfig',
-
+    'movie',
+    'playlist',
+    'post',
 
     # django apps
     'django.contrib.admin',
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
+    'stripe',
 ]
 
 MIDDLEWARE = [
@@ -80,9 +81,11 @@ TEMPLATES = [
 ]
 
 AUTH_USER_MODEL = 'account.Account'
+AUTH_MOVIE_MODEL = 'movie.Film'
+
+AUTH_FILM_MODEL = 'movie.Film'
 
 WSGI_APPLICATION = 'movienet.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -93,7 +96,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -113,7 +115,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -127,12 +128,14 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+MEDIA_URL = '/movie/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'movie/media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -145,7 +148,7 @@ LOGIN_REDIRECT_URL = 'home'
 
 LOGOUT_REDIRECT_URL = 'home'
 
-LOGIN_URL = 'must_authenticate'
+LOGIN_URL = 'account:must_authenticate'
 
 try:
     from django.contrib.messages import constants as messages

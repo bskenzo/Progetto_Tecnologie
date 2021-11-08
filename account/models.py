@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, AbstractUser, User
 
+COUPONS = {'christmas': 20,
+           'easter': 10,
+           'epiphany': 5}
+
 
 class MyAccountManager(BaseUserManager):
     # se si hanno altri required_fields bisogna aggiungerli qui
@@ -27,7 +31,7 @@ class MyAccountManager(BaseUserManager):
         user.is_admin = True
         user.is_staff = True
         user.is_superuser = True
-        user.is_subscribe = True
+        user.is_subscribe = 'active'
         user.save(using=self._db)
         return user
 
@@ -45,6 +49,7 @@ class Account(AbstractBaseUser):
     stripe_subscription_id = models.CharField(max_length=255)
     is_subscribe = models.CharField(max_length=255, default="not_active")
     expire_date = models.DateField(verbose_name='expire date', default='1970-01-01')
+    spoiler = models.BooleanField(default=False)
     # possiamo aggiungere altri field come il nome o il compleanno
 
     USERNAME_FIELD = 'email'

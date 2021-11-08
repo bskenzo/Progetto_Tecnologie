@@ -3,21 +3,18 @@
 
 {% block content %}
 
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    <div class="d-flex flex-column">
-        <h4 class="m-auto" style="color: red">You are going to delete your account.</h4>
-        <h4 class="m-auto" style="color: red">Are you sure?</h4>
+    <div class="container text-center">
+        <h4 style="color: red">You are going to delete the account.</h4>
+        <h4 style="color: red">Are you sure?</h4>
         <form class="form-signin" method="POST">{% csrf_token %}
             {{ form.as_p }}
-            <input type="submit" class="btn btn-outline-danger m-auto" name="delete" value="Submit">
-            <a href="{% url 'account' %}"><button type="button" class="btn btn-outline-primary m-auto"">Return to account</button></a>
+            {% if user.is_admin %}
+                <a href="{% url 'account:manage_account' %}"><button type="button" class="btn btn-outline-primary">Cancel</button></a>
+            {% else %}
+                 <a href="{% url 'account:account' %}"><button type="button" class="btn btn-outline-primary">Return to account</button></a>
+            {% endif %}
+
+            <input type="submit" class="btn btn-outline-danger m-auto" name="delete" value="Delete">
         </form>
     </div>
 

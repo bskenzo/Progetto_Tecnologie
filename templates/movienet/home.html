@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/playlist.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css" >
+    <script src="https://unpkg.com/flickity@2/dist/flickity.pkgd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+
+    {% if films|length > 0 %}
+        {% if films|length > 10 %}
+            <div class="container-fluid my-4">
+        {% else %}
+            <div class="container my-4">
+        {% endif%}
+            <h3 class="mt-4">Most viewed films:</h3>
+            <div class="main-gallery js-flickity"
+                 data-flickity-options='{ "contain": true }'>
+                {% for film in films %}
+                    <div onclick="location.href='{% url 'movie:film-detail' film.pk %}'" class="gallery-cell bg-image"
+                         style="background-image: url('{{ film.poster.url }}');
+                            background-size: 146px 298px; background-repeat: no-repeat; background-position: center;
+                                 cursor: pointer;">
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+
+    {% if user.is_authenticated %}
+        <div class="container my-4">
+            {% if list|length > 0 %}
+                <h3 class="mt-4">Top picks for {{ user.username }}</h3>
+                <div class="main-gallery js-flickity"
+                     data-flickity-options='{ "contain": true }'>
+                    {% for film in list %}
+                        <div onclick="location.href='{% url 'movie:film-detail' film.pk %}'"
+                             class="gallery-cell bg-image" style="background-image: url('{{ film.poster.url }}');
+                                background-size: 146px 298px; background-repeat: no-repeat;
+                                background-position: center; cursor: pointer;">
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+
+    {% for x, y in genres %}
+        {% if films|length > 10 %}
+            <div class="container-fluid my-4">
+        {% else %}
+            <div class="container my-4">
+        {% endif%}
+            <h3 class="mt-4">{{ x.title }}</h3>
+            <div class="main-gallery js-flickity" data-flickity-options='{ "contain": true }'>
+                {% for film in y %}
+                    <div onclick="location.href='{% url 'movie:film-detail' film.pk %}'" class="gallery-cell bg-image"
+                         style="background-image: url('{{ film.poster.url }}'); background-size: 146px 298px;
+                                 background-repeat: no-repeat; background-position: center; cursor: pointer;">
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    {% endfor %}
+
+{% endblock %}

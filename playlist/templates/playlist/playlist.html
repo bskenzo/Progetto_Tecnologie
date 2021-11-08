@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/playlist.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css" >
+    <script src="https://unpkg.com/flickity@2/dist/flickity.pkgd.min.js"></script>
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="container text-center">
+
+        <button type="button" class="btn btn-outline-success mx-auto mb-4" data-target="#createModal"
+                 data-toggle="modal">Create Playlist
+        </button>
+
+        <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form method="POST">{% csrf_token %}
+                            <div class="form-group">
+                                <label for="name" class="col-form-label">Playlist name:</label>
+                                <input type="text" class="form-control" name="name" id="name">
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-outline-success">Create</button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-danger mx-auto mb-4" data-target="#deleteModal"
+                 data-toggle="modal">Delete Playlist
+        </button>
+
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Select a Playlist</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST">{% csrf_token %}
+                            <div class="form-group">
+                                <label for="playlist" class="form-label">Playlist</label>
+                                <select name="playlist" required class="form-control" id="playlist">
+                                    {% for pl in playlists %}
+                                        <option>{{ pl.pk }}-{{ pl.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-outline-danger">Delete</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if playlists|length <= 0 %}
+            <h2>You have no playlist</h2>
+        {% else %}
+            <h1 class="display-4">Your playlist</h1>
+
+            {% for playlist in playlists %}
+                <div class="container my-4">
+                    <h3 class="mt-4">{{ playlist.name }}</h3>
+                    {% if playlist.film.all|length > 0 %}
+                        <div class="main-gallery js-flickity"
+                             data-flickity-options='{ "contain": true }'>
+                            {% for film in playlist.film.all %}
+                                <div onclick="location.href='{% url 'movie:film-detail' film.pk %}'" class="gallery-cell bg-image" style="background-image: url('{{ film.poster.url }}');
+                                        background-size: 146px 298px; background-repeat: no-repeat; background-position: center; cursor: pointer;">
+                                    <a style="color: red; background-color: whitesmoke" id="remove" href="{% url 'playlist:add-remove' operation='remove' pk=film.pk playlist_id=playlist.pk %}">Remove</a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <h5>Is empty</h5>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+
+{% endblock %}
+
+
+

@@ -6,8 +6,8 @@
         <div class="d-flex flex-column">
             <p class="m-auto">Must authenticate to view this page</p>
             <p class="m-auto">
-                <a href="{% url 'register' %}">Register</a> or
-                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'account:register' %}?next={{ next }}">Register</a> or
+                <a href="{% url 'account:login' %}?next={{ next }}">Login</a>
             </p>
         </div>
     </div>

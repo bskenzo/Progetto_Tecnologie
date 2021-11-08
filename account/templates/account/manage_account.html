@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container text-center">
+        {% if extra_context|length <= 0 %}
+            <h3>There are no account</h3>
+        {% endif %}
+        {% for users in extra_context %}
+            <div class="mb-3">
+                <h3>{{ users }}</h3>
+                <a class="btn btn-outline-danger" type="button" href="{% url 'account:delete' users.pk %}">Delete</a>
+                {% if users.is_staff %}
+                    <a class="btn btn-outline-info" type="button" href="{% url 'account:downgrade' users.pk %}">Remove by staff</a>
+                {% else %}
+                    <a class="btn btn-outline-success" type="button" href="{% url 'account:make_staff' users.pk %}">Make staff</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+
+{% endblock %}
