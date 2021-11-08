@@ -24,14 +24,14 @@
                                 </div>
 
                             <div class="mb-3">
-                                <p>{{ object.genre }} - {{ object.director }}</p>
+                                <p>{{ object.genre | capfirst }} - {{ object.director }}</p>
                                 <p>{{ object.plot }}</p>
                             </div>
 
 
                             <div class="my-3">
-                                <button type="submit" class="btn btn-outline-danger m-auto">Delete</button>
                                 <a href="{% url 'movie:film-detail' object.pk %}" class="btn btn-outline-primary m-auto">Return to detail</a>
+                                <button type="submit" class="btn btn-outline-danger m-auto">Delete</button>
                             </div>
 
                         </form>

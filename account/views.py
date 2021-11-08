@@ -1,17 +1,19 @@
 from datetime import datetime
 
+import stripe
 from django.contrib import messages
+from django.contrib.auth import logout, update_session_auth_hash, login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.http import Http404
 from django.shortcuts import render, redirect
-from django.contrib.auth import logout, update_session_auth_hash, login, authenticate
+from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, TemplateView, UpdateView, DeleteView
 
 from account.forms import RegistrationForm, AccountAuthenticationForm, AccountUpdateForm
-from django.urls import reverse_lazy, reverse
 from account.models import Account
-import stripe
+from account.models import COUPONS as coupons
 
 
 class RegisterUser(CreateView):
@@ -144,11 +146,52 @@ class DeleteAccountView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('home')
 
     def delete(self, request, *args, **kwargs):
-        if request.user.stripe_id != "id_test":
-            stripe.Customer.delete(request.user.stripe_id)
+        user = self.get_object()
+        if user.stripe_id != "id_test":
+            stripe.Customer.delete(user.stripe_id)
 
-        messages.success(request, "The user is deleted")
+        if request.user.is_admin:
+            messages.success(request, f'Account {user.email} is deleted')
+            self.success_url = reverse('account:manage_account')
+        else:
+            messages.success(request, "Account deleted")
         return super().delete(request)
+
+
+class ManageAccount(TemplateView):
+    model = Account
+    template_name = 'account/manage_account.html'
+    success_url = reverse_lazy('account:manage_account')
+
+    def get_context_data(self, **kwargs):
+        account = Account.objects.all()
+        request = Account.objects.filter(email=self.request.user.email)
+        account = account.difference(request)
+        return super(ManageAccount, self).get_context_data(extra_context=account)
+
+
+def make_staff(request, pk):
+    account = Account.objects.get(pk=pk)
+    if request.user.is_admin:
+        account.is_staff = True
+        account.is_subscribe = 'active'
+        account.save()
+        messages.success(request, f'User {account.username} upgrade to staff')
+        return redirect('account:manage_account')
+    else:
+        raise Http404
+
+
+def downgrade(request, pk):
+    account = Account.objects.get(pk=pk)
+    if request.user.is_admin:
+        account.is_staff = False
+        account.is_subscribe = 'not_active'
+        account.save()
+        messages.success(request, f'User {account.username} removed by staff')
+        return redirect('account:manage_account')
+    else:
+        raise Http404
 
 
 class PricingView(TemplateView):
@@ -169,8 +212,6 @@ class CheckoutView(LoginRequiredMixin, UpdateView):
     template_name = 'account/payments/checkout.html'
 
     def post(self, request, *args, **kwargs):
-
-        coupons = {'christmas': 20, 'easter': 10, 'epiphany': 5}
 
         # se l'utente esiste su stripe
         if request.user.stripe_id != "id_test":
@@ -265,8 +306,6 @@ class CheckoutView(LoginRequiredMixin, UpdateView):
         return redirect('home')
 
     def get(self, request, *args, **kwargs):
-        coupons = {'christmas': 20, 'easter': 10, 'epiphany': 5}
-
         coupon_amount = 0
         coupon = 'none'
         price = 'Monthly'

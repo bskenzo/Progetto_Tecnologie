@@ -35,7 +35,7 @@ class FilmCreateView(LoginRequiredMixin, CreateView):
 
         if form.is_valid():
             form.save()
-            return redirect('home')
+            return redirect('movie:list')
         else:
             form = FilmForm()
 
@@ -178,9 +178,8 @@ class FilmDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         film = Film.objects.get(id=self.get_object().pk)
         film.poster.delete()
-        film.video.delete()
         film.delete()
-        return redirect('home')
+        return redirect('movie:list')
 
 
 class FilmStreamView(LoginRequiredMixin, DetailView):
@@ -404,12 +403,6 @@ class CheckoutView(LoginRequiredMixin, UpdateView):
 
     def post(self, request, *args, **kwargs):
 
-        if not request.user.is_authenticated:
-            return redirect('account:must_authenticate')
-
-        if request.user.is_subscribe == 'active':
-            return redirect('account:pricing')
-
         product_id = request.GET['price']
         product = Film.objects.get(id=product_id)
         account = Account.objects.get(email=request.user.email)
@@ -463,6 +456,12 @@ class CheckoutView(LoginRequiredMixin, UpdateView):
         return redirect('movie:my-list')
 
     def get(self, request, *args, **kwargs):
+
+        if not request.user.is_authenticated:
+            return redirect('account:must_authenticate')
+
+        if request.user.is_subscribe == 'active' or request.user.is_admin:
+            return redirect('account:pricing')
 
         film = 'No_Choice'
         amount = 0.00

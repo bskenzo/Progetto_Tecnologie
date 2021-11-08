@@ -12,6 +12,8 @@
         <h1 class="display-4">Subscribe</h1>
         {% if user.is_subscribe != "active" %}
             <p class="lead">Choose here your subscription</p>
+        {% elif user.is_staff %}
+            <h5 class="mb-3 text-center">You are a staff member</h5>
         {% else %}
             <p class="lead">You already have a subscription</p>
         {% endif %}
@@ -20,9 +22,7 @@
 
     <div class="container">
         {% if user.is_subscribe == "active" %}
-            {% if user.is_staff %}
-                <h5 class="mb-3 text-center">You are a staff member</h5>
-            {% else %}
+            {% if not user.is_staff %}
                 <h5 class="mb-3 text-center">Your subscription expire: {{ user.expire_date }}</h5>
             {% endif %}
         {% endif %}

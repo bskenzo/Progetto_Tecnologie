@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, AbstractUser, User
 
+COUPONS = {'christmas': 20,
+           'easter': 10,
+           'epiphany': 5}
+
 
 class MyAccountManager(BaseUserManager):
     # se si hanno altri required_fields bisogna aggiungerli qui

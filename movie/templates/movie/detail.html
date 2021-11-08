@@ -35,7 +35,6 @@
                     {% if user.is_staff %}
                         <a href="{% url 'movie:update-film' object.pk %}" class="btn btn-outline-primary">Update</a>
                         <a href="{% url 'movie:delete-film' object.pk %}" class="btn btn-outline-danger">Delete</a>
-                        <a href="{% url 'movie:checkout' %}?price={{ object.pk }}" class="btn btn-outline-success my-2">Test buy</a>
                     {% endif %}
 
                     {% if user.is_authenticated %}

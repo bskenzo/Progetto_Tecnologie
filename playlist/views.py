@@ -24,7 +24,6 @@ class PlaylistView(LoginRequiredMixin, TemplateView, CreateView):
 
     def post(self, request, *args, **kwargs):
         try:
-            print(request)
             name = request.POST['name']
             pl = Playlist()
             pl.name = name
