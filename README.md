@@ -55,6 +55,13 @@ Il progetto e fornito con:
 
 E inoltre possibile creare altri utenti direttamente tramite app
 
+## **Metodo di Pagamento**
+Il metodo di pagamento è stato gestito tramite l'API esterna Stripe
+
+Ai fini progettuali è stata attivata la modalità di test, è quindi possibile effettuare un pagamento inserendo i seguenti dati
+* 4242 4242 4242 4242
+* come data di scadenza e cvv è possibile inserire una qualsiasi data ancora in corso di validità e un qualsiasi cvv
+
 ## **Supporto**
 
 Per ogni problema utilizzare i seguenti contatti:
