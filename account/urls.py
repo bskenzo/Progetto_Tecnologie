@@ -3,7 +3,7 @@ from django.urls import path
 
 from account.decorator import admin_required
 from account.views import PricingView, RegisterUser, LogoutUser, LoginUser, UpdateUser, MustAuthenticate, CheckoutView, \
-    PasswordChangeViewP, DeleteAccountView, ManageAccount, make_staff, downgrade
+    PasswordChangeViewP, DeleteAccountView, ManageAccount, make_staff, downgrade, ImgView
 
 app_name = 'account'
 
@@ -16,6 +16,7 @@ urlpatterns = [
     path('', UpdateUser.as_view(), name='account'),
     path('must_authenticate/', MustAuthenticate.as_view(), name='must_authenticate'),
     path('manage_account/', admin_required(ManageAccount.as_view()), name='manage_account'),
+    path('manage_img/<int:pk>', ImgView.as_view(), name='manage_img'),
     path('makestaff/<int:pk>', make_staff, name='make_staff'),
     path('downgrade/<int:pk>', downgrade, name='downgrade'),
     path('checkout/', CheckoutView.as_view(), name='checkout'),

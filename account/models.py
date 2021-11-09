@@ -1,3 +1,4 @@
+from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, AbstractUser, User
 
@@ -50,6 +51,7 @@ class Account(AbstractBaseUser):
     is_subscribe = models.CharField(max_length=255, default="not_active")
     expire_date = models.DateField(verbose_name='expire date', default='1970-01-01')
     spoiler = models.BooleanField(default=False)
+    img = models.ImageField(upload_to='images/', default='images/user_img.png')
     # possiamo aggiungere altri field come il nome o il compleanno
 
     USERNAME_FIELD = 'email'

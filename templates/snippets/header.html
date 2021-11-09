@@ -27,9 +27,10 @@
                 <a class="p-2" href="{% url 'movie:list' %}">
                     <img src="https://img.icons8.com/material-outlined/20/000000/cinema-.png"/>Catalog</a>
             </p>
-
             <div class="dropdown">
-                <a class="dropbtn" id="username">{{ user.username|capfirst }}</a>
+                <a class="dropbtn" id="username">
+                <img src="{{ user.img.url }}" class="rounded-circle" alt=""/>{{ user.username|capfirst }}
+                </a>
                 <div class="dropdown-content my-4">
                     <a class="dropdown-item" href="{% url 'account:pricing' %}">Subscribe</a>
                     <a class="dropdown-item" href="{% url 'account:account' %}">Settings</a>

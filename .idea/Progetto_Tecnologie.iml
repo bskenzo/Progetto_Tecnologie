@@ -28,7 +28,6 @@
         <option value="$MODULE_DIR$/account/templates" />
         <option value="$MODULE_DIR$/templates" />
         <option value="$MODULE_DIR$/movie/templates" />
-        <option value="$MODULE_DIR$/movienet/templates" />
       </list>
     </option>
   </component>
