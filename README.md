@@ -34,6 +34,25 @@ Infine lanciare il programma con:
 
 Successivamente copiare ed incollare il seguente URL `https://127.0.0.1:8000/` su un Browser(consigliato l'uso di Google Chrome) ed il gioco è fatto!
 
+## **Uso**
+Il progetto e fornito con:
+
+  * Un utente amministratore
+    *  Email: admin@gmail.com
+    *  Password: admin
+
+  * Un utente con abbonamento annuale
+    * Email: abbonato@gmail.com
+    * Password: prova1234
+
+  * Un utente registrato
+    * Email: registrato@gmail.com
+    * Password: prova1234
+
+  * Un utente facente parte dello staff
+    * Email: staff@gmail.com
+    * Password: prova1234
+
 ## **Supporto**
 
 Per ogni problema utilizzare i seguenti contatti:
