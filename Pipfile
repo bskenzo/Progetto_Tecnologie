@@ -8,6 +8,7 @@ django = "*"
 django-crispy-forms = "*"
 stripe = "*"
 pillow = "*"
+coverage = "*"
 
 [dev-packages]
 

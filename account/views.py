@@ -142,6 +142,11 @@ class ImgView(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         user = Account.objects.get(email=self.request.user.email)
         return super(ImgView, self).get_context_data(extra_context=user)
+    
+    def get(self, request, *args, **kwargs):
+        if request.user.pk != kwargs['pk']:
+            raise Http404
+        return super(ImgView, self).get(request, *args, **kwargs)
 
 
 class PasswordChangeViewP(PasswordChangeView):
