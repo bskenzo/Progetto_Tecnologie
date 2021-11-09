@@ -46,7 +46,7 @@ Il progetto e fornito con:
     * Password: prova1234
 
   * Un utente registrato
-    * Email: registrato@gmail.com
+    * Email: toor@gmail.com
     * Password: prova1234
 
   * Un utente facente parte dello staff
