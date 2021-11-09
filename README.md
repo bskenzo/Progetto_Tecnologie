@@ -34,7 +34,7 @@ Infine lanciare il programma con:
 
 Successivamente copiare ed incollare il seguente URL `https://127.0.0.1:8000/` su un Browser(consigliato l'uso di Google Chrome) ed il gioco è fatto!
 
-## **Uso**
+## **Utenti**
 Il progetto e fornito con:
 
   * Un utente amministratore
@@ -52,6 +52,8 @@ Il progetto e fornito con:
   * Un utente facente parte dello staff
     * Email: staff@gmail.com
     * Password: prova1234
+
+E inoltre possibile creare altri utenti direttamente tramite app
 
 ## **Supporto**
 
