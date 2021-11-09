@@ -2,11 +2,11 @@
 
 Movienet è un piattaforma di streaming online.
 
-## **RACCOMANDAZIONI**
+## **Raccomandazioni**
 
 Per il corretto funzionamento del programma bisogna aver installato sul proprio pc [**python3.9**](https://www.python.org/downloads/)
 
-## Istallazione
+## **Istallazione**
 
 Per poter utilizzare **MOVIENET** è necessario installare i moduli Python necessari
 
@@ -34,7 +34,7 @@ Ora non ci resta che lanciare il programma con:
 
 Successivamente copiare ed incollare il seguente URL `https://127.0.0.1:5000/` su Google Chrome ed il gioco è fatto!
 
-## **SUPPORTO**
+## **Supporto**
 
 Per ogni problema utilizzare i seguenti contatti:
 * 243470@studenti.unimore.it - Davis Innangi
