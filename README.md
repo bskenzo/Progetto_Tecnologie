@@ -14,25 +14,25 @@ Per poter utilizzare **MOVIENET** è necessario installare i moduli Python neces
 2. Entrare nella cartella del progetto
 3. Lanciare i comandi di seguito elencati
 
-Creiamo un ambiente virtuale:
+Creazione di un ambiente virtuale:
 
 ```python
   pipenv shell
 ```
 
-Istalliamo i requisiti necessari che sono contenuti nel Pipfile.lock con il comando:
+Istallazione dei requisiti necessari che sono contenuti nel Pipfile.lock con il comando:
 
 ```python
   pipenv install
 ```
 
-Ora non ci resta che lanciare il programma con:
+Infine lanciare il programma con:
 
 ```python
   python manage.py runserver
 ```
 
-Successivamente copiare ed incollare il seguente URL `https://127.0.0.1:5000/` su Google Chrome ed il gioco è fatto!
+Successivamente copiare ed incollare il seguente URL `https://127.0.0.1:8000/` su un Browser(consigliato l'uso di Google Chrome) ed il gioco è fatto!
 
 ## **Supporto**
 
